@@ -40,6 +40,7 @@ import {
   Globe,
   Check,
   RefreshCw,
+  ChevronLeft as ChevronLeftIcon,
 } from "lucide-react";
 
 type MediaType = "photo" | "video" | null;
@@ -75,7 +76,6 @@ export default function CreatePublicationPage() {
   const [communicationSubType, setCommunicationSubType] = useState<CommunicationSubType>(null);
   
   const [media, setMedia] = useState<PublicationMedia[]>([]);
-  const [descriptionMode, setDescriptionMode] = useState<"vocal" | "written" | null>(null);
   const [vocalDescription, setVocalDescription] = useState("");
   const [writtenDescription, setWrittenDescription] = useState("");
   const [isRecording, setIsRecording] = useState(false);
@@ -86,6 +86,7 @@ export default function CreatePublicationPage() {
   const [showPreview, setShowPreview] = useState(false);
   const [retoucheLevel, setRetoucheLevel] = useState<RetoucheLevel>("smart");
   const [generatedCaption, setGeneratedCaption] = useState("");
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   
   const [socialNetworks, setSocialNetworks] = useState<SocialNetwork[]>([
     { id: "instagram", name: "Instagram", icon: "📸", caption: "" },
@@ -233,6 +234,14 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
     setSocialNetworks(prev => prev.map(n => 
       n.id === selectedNetwork ? { ...n, caption } : n
     ));
+  };
+
+  const handleNextPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev + 1) % media.length);
+  };
+
+  const handlePrevPhoto = () => {
+    setCurrentPhotoIndex((prev) => (prev - 1 + media.length) % media.length);
   };
 
   return (
@@ -620,7 +629,7 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
             </motion.div>
           )}
 
-          {/* Step 4: Description (vocal ET écrit sur même page) */}
+          {/* Step 4: Description (vocal ET écrit ENSEMBLE) */}
           {currentStep === 4 && (
             <motion.div
               key="step4-description"
@@ -648,47 +657,27 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
                 </div>
               </Card>
 
-              {/* Onglets Vocal / Écrit */}
-              <div className="flex gap-3 p-1.5 bg-muted rounded-xl">
-                <button
-                  onClick={() => setDescriptionMode("vocal")}
-                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
-                    descriptionMode === "vocal" 
-                      ? "bg-primary text-white shadow-lg" 
-                      : "hover:bg-background"
-                  }`}
-                >
-                  <Mic className="w-5 h-5" />
-                  Description vocale
-                </button>
-                <button
-                  onClick={() => setDescriptionMode("written")}
-                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
-                    descriptionMode === "written" 
-                      ? "bg-primary text-white shadow-lg" 
-                      : "hover:bg-background"
-                  }`}
-                >
-                  <TypeIcon className="w-5 h-5" />
-                  Description écrite
-                </button>
-              </div>
-
               {/* Zone vocale */}
-              {descriptionMode === "vocal" && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex flex-col items-center gap-6 py-8"
-                >
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <Mic className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg">Description vocale</p>
+                    <p className="text-sm text-muted-foreground">Enregistrez votre description à l'oral</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center gap-6 py-6">
                   {!isRecording && !vocalDescription && (
                     <motion.button
                       onClick={handleStartRecording}
-                      className="w-32 h-32 bg-primary rounded-full flex items-center justify-center group hover:scale-105 transition-all shadow-xl"
+                      className="w-24 h-24 bg-primary rounded-full flex items-center justify-center group hover:scale-105 transition-all shadow-xl"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Mic className="w-16 h-16 text-white" />
+                      <Mic className="w-12 h-12 text-white" />
                     </motion.button>
                   )}
 
@@ -697,9 +686,9 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
                       <motion.div
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ repeat: Infinity, duration: 1.5 }}
-                        className="w-32 h-32 bg-red-500 rounded-full flex items-center justify-center"
+                        className="w-24 h-24 bg-red-500 rounded-full flex items-center justify-center"
                       >
-                        <Mic className="w-16 h-16 text-white" />
+                        <Mic className="w-12 h-12 text-white" />
                       </motion.div>
                       <p className="text-2xl font-bold text-red-500">{formatTime(recordingTime)}</p>
                       <Button onClick={handleStopRecording} variant="destructive" size="lg">
@@ -709,8 +698,8 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
                   )}
 
                   {vocalDescription && (
-                    <Card className="w-full p-6">
-                      <div className="flex items-center gap-2 mb-4">
+                    <div className="w-full">
+                      <div className="flex items-center gap-2 mb-3">
                         <Check className="w-5 h-5 text-green-500" />
                         <p className="font-bold">Transcription terminée</p>
                       </div>
@@ -725,25 +714,30 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
                           Recommencer
                         </Button>
                       </div>
-                    </Card>
+                    </div>
                   )}
-                </motion.div>
-              )}
+                </div>
+              </Card>
 
               {/* Zone écrite */}
-              {descriptionMode === "written" && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <Textarea
-                    placeholder="Exemple : Rénovation complète d'une salle de bain à Paris 11ème. Le chantier a duré 3 semaines. Nous avons fait la démolition, la plomberie, l'électricité et les finitions. Le client est très satisfait du résultat..."
-                    value={writtenDescription}
-                    onChange={(e) => setWrittenDescription(e.target.value)}
-                    className="min-h-[200px] text-base"
-                  />
-                </motion.div>
-              )}
+              <Card className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                    <TypeIcon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-lg">Description écrite</p>
+                    <p className="text-sm text-muted-foreground">Rédigez votre description manuellement</p>
+                  </div>
+                </div>
+
+                <Textarea
+                  placeholder="Exemple : Rénovation complète d'une salle de bain à Paris 11ème. Le chantier a duré 3 semaines. Nous avons fait la démolition, la plomberie, l'électricité et les finitions. Le client est très satisfait du résultat..."
+                  value={writtenDescription}
+                  onChange={(e) => setWrittenDescription(e.target.value)}
+                  className="min-h-[200px] text-base"
+                />
+              </Card>
 
               {(vocalDescription || writtenDescription.trim()) && (
                 <div className="space-y-4">
@@ -893,47 +887,58 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
                     </div>
                   </div>
 
-                  {/* Carousel photos */}
-                  <div className="relative aspect-square bg-muted">
+                  {/* Carousel photos avec navigation */}
+                  <div className="relative aspect-square bg-muted group">
                     {media.length > 0 && (
-                      <img 
-                        src={media[0].url} 
-                        alt="Photo 1" 
-                        className="w-full h-full object-cover"
-                      />
+                      <>
+                        <img 
+                          src={media[currentPhotoIndex].url} 
+                          alt={`Photo ${currentPhotoIndex + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        
+                        {/* Boutons navigation */}
+                        {media.length > 1 && (
+                          <>
+                            <button
+                              onClick={handlePrevPhoto}
+                              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <ChevronLeftIcon className="w-5 h-5 text-white" />
+                            </button>
+                            <button
+                              onClick={handleNextPhoto}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <ChevronRight className="w-5 h-5 text-white" />
+                            </button>
+                          </>
+                        )}
+                        
+                        {/* Indicateurs */}
+                        {media.length > 1 && (
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                            {media.map((_, idx) => (
+                              <div 
+                                key={idx} 
+                                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                                  idx === currentPhotoIndex ? "bg-white w-6" : "bg-white/40"
+                                }`} 
+                              />
+                            ))}
+                          </div>
+                        )}
+                        
+                        {/* Compteur de photos */}
+                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium">
+                          {currentPhotoIndex + 1}/{media.length}
+                        </div>
+                      </>
                     )}
-                    {media.length > 1 && (
-                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                        {media.map((_, idx) => (
-                          <div 
-                            key={idx} 
-                            className={`w-1.5 h-1.5 rounded-full ${idx === 0 ? "bg-white" : "bg-white/40"}`} 
-                          />
-                        ))}
-                      </div>
-                    )}
-                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium">
-                      {media.length} photo{media.length > 1 ? "s" : ""}
-                    </div>
-                  </div>
-
-                  {/* Actions type Instagram */}
-                  <div className="p-4">
-                    <div className="flex gap-4 mb-3">
-                      <button className="hover:opacity-70 transition-opacity">❤️</button>
-                      <button className="hover:opacity-70 transition-opacity">💬</button>
-                      <button className="hover:opacity-70 transition-opacity">📤</button>
-                    </div>
-                    <p className="text-sm">
-                      <span className="font-bold">{companyData?.companyName || "Votre entreprise"}</span>{" "}
-                      <span className="text-muted-foreground line-clamp-2">
-                        {getCurrentCaption().split("\n")[0].substring(0, 100)}...
-                      </span>
-                    </p>
                   </div>
                 </Card>
 
-                {/* Options retouche */}
+                {/* Options retouche juste en dessous de l'image */}
                 <Card className="p-5">
                   <p className="font-bold mb-4 flex items-center gap-2">
                     <Wand2 className="w-5 h-5 text-primary" />
