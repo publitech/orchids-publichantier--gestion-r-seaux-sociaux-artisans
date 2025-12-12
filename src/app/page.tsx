@@ -376,7 +376,7 @@ function Step3MagicOnboarding({
         )}
       </div>
 
-      <Dialog open={showVerificationModal} onOpenChange={setShowVerificationModal}>
+      <Dialog open={showVerificationModal} onOpenChange={(open) => setShowVerificationModal(open)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold flex items-center gap-2">
