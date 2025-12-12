@@ -496,6 +496,9 @@ function Step6LogoColors({
   setData: (d: OnboardingData) => void;
 }) {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [showLogoModal, setShowLogoModal] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedLogos, setGeneratedLogos] = useState<string[]>([]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -503,6 +506,38 @@ function Step6LogoColors({
       setData({ ...data, logo: file });
       setLogoPreview(URL.createObjectURL(file));
     }
+  };
+
+  const handleGenerateLogos = () => {
+    setShowLogoModal(true);
+    setIsGenerating(true);
+    
+    setTimeout(() => {
+      const mockLogos = Array.from({ length: 10 }, (_, i) => {
+        const colors = [data.primaryColor, data.secondaryColor];
+        const initial = data.companyName.charAt(0).toUpperCase() || 'L';
+        return `data:image/svg+xml,${encodeURIComponent(`
+          <svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+            <rect width="200" height="200" fill="${colors[i % 2]}" rx="20"/>
+            <text x="100" y="120" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white" text-anchor="middle">${initial}</text>
+            <text x="100" y="160" font-family="Arial, sans-serif" font-size="16" fill="white" text-anchor="middle" opacity="0.8">Style ${i + 1}</text>
+          </svg>
+        `)}`;
+      });
+      setGeneratedLogos(mockLogos);
+      setIsGenerating(false);
+    }, 2000);
+  };
+
+  const handleSelectLogo = async (logoUrl: string) => {
+    setLogoPreview(logoUrl);
+    
+    const response = await fetch(logoUrl);
+    const blob = await response.blob();
+    const file = new File([blob], "generated-logo.svg", { type: "image/svg+xml" });
+    setData({ ...data, logo: file });
+    
+    setShowLogoModal(false);
   };
 
   return (
@@ -531,7 +566,12 @@ function Step6LogoColors({
               <p className="text-sm text-muted-foreground">
                 Formats acceptés : PNG, JPG, SVG
               </p>
-              <Button variant="outline" size="sm" className="mt-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2"
+                onClick={handleGenerateLogos}
+              >
                 <Wand2 className="w-4 h-4 mr-2" />
                 Générer un logo
               </Button>
@@ -579,6 +619,46 @@ function Step6LogoColors({
           Suggérer des couleurs depuis mon site
         </Button>
       </div>
+
+      <Dialog open={showLogoModal} onOpenChange={setShowLogoModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Choisissez votre logo</DialogTitle>
+            <p className="text-muted-foreground mt-2">
+              Sélectionnez le logo qui représente le mieux votre entreprise
+            </p>
+          </DialogHeader>
+
+          {isGenerating ? (
+            <div className="flex flex-col items-center justify-center py-16 space-y-4">
+              <Loader2 className="w-12 h-12 text-primary animate-spin" />
+              <p className="text-lg font-medium">Génération de vos logos...</p>
+              <p className="text-sm text-muted-foreground">Création de 10 propositions personnalisées</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 py-4">
+              {generatedLogos.map((logo, index) => (
+                <motion.button
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                  onClick={() => handleSelectLogo(logo)}
+                  className="aspect-square rounded-xl border-2 border-border hover:border-primary hover:scale-105 transition-all p-2 bg-white"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <img 
+                    src={logo} 
+                    alt={`Logo ${index + 1}`} 
+                    className="w-full h-full object-contain rounded-lg"
+                  />
+                </motion.button>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </StepWrapper>
   );
 }
