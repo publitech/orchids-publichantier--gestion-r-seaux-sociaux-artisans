@@ -955,6 +955,13 @@ export default function OnboardingPage() {
     }
   };
 
+  const getButtonLabel = () => {
+    if (currentStep === 2 && !data.websiteUrl) {
+      return "Je n'ai pas de site internet";
+    }
+    return "Continuer";
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -1019,7 +1026,7 @@ export default function OnboardingPage() {
               disabled={!canProceed()}
               className="w-full h-14 text-base font-semibold"
             >
-              Continuer
+              {getButtonLabel()}
               <ChevronRight className="w-5 h-5 ml-2" />
             </Button>
           </div>
