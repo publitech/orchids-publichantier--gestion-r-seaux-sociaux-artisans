@@ -301,7 +301,6 @@ function Step3MagicOnboarding({
     setIsLoadingScreenshot(true);
     setShowVerificationModal(true);
     
-    // Simuler le chargement d'une capture d'écran
     setTimeout(() => {
       setWebsiteScreenshot(`https://api.screenshotmachine.com/?key=demo&url=${encodeURIComponent(data.websiteUrl)}&dimension=1024x768`);
       setIsLoadingScreenshot(false);
@@ -333,20 +332,19 @@ function Step3MagicOnboarding({
   return (
     <StepWrapper 
       title="Avez-vous un site internet ?" 
-      subtitle="Laissez la magie opérer ✨"
+      subtitle="Nous remplirons automatiquement vos informations"
       icon={Globe}
     >
       <div className="space-y-6">
         <div className="p-5 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl border border-primary/20">
-          <div className="flex items-start gap-3 mb-3">
+          <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <Wand2 className="w-5 h-5 text-primary" />
+              <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-bold text-foreground mb-1">Magic Onboarding</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Entrez l'URL de votre site et nous analyserons automatiquement vos informations 
-                (adresse, contact, description...) pour gagner du temps !
+                Si vous ajoutez l'URL de votre site internet, nous analyserons automatiquement 
+                vos informations (adresse, contact, description...) pour gagner du temps !
               </p>
             </div>
           </div>
@@ -406,13 +404,6 @@ function Step3MagicOnboarding({
             </div>
           </motion.div>
         )}
-
-        <div className="text-center p-4 bg-muted/50 rounded-xl">
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Pas de site web ?</span> Aucun problème ! <br/>
-            Vous pourrez remplir toutes les informations manuellement à l'étape suivante.
-          </p>
-        </div>
       </div>
 
       <Dialog open={showVerificationModal} onOpenChange={setShowVerificationModal}>
@@ -440,7 +431,6 @@ function Step3MagicOnboarding({
                   alt="Capture d'écran du site" 
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    // Fallback si l'image ne charge pas
                     e.currentTarget.src = `https://placehold.co/1024x768/212737/ffffff?text=${encodeURIComponent(data.websiteUrl)}`;
                   }}
                 />
