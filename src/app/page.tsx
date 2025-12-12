@@ -226,7 +226,7 @@ function Step1Auth({
               placeholder="votre@email.com"
               value={data.email}
               onChange={(e) => setData({ ...data, email: e.target.value })}
-              className="h-12 mt-1"
+              className="h-12 mt-1 bg-white"
             />
           </div>
           <div>
@@ -237,7 +237,7 @@ function Step1Auth({
               placeholder="••••••••"
               value={data.password}
               onChange={(e) => setData({ ...data, password: e.target.value })}
-              className="h-12 mt-1"
+              className="h-12 mt-1 bg-white"
             />
           </div>
           <Button 
