@@ -296,7 +296,7 @@ function Step3MagicOnboarding({
   data: OnboardingData; 
   setData: (d: OnboardingData) => void;
   onNext: () => void;
-  onContinue: () => void;
+  onContinue: React.MutableRefObject<(() => void) | null>;
 }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
@@ -1199,7 +1199,7 @@ function Step11Final({ data }: { data: OnboardingData }) {
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<OnboardingData>(initialData);
-  const step3ContinueRef = useRef<(() => void) | null>(null);
+  const step3ContinueRef = useRef<React.MutableRefObject<(() => void) | null>>(null);
 
   const nextStep = () => setCurrentStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 0));
