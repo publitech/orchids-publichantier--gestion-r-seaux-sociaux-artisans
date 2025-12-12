@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { saveOnboardingData } from "@/lib/onboarding-storage";
 import { 
   Dialog,
   DialogContent,
@@ -854,10 +856,36 @@ function Step8Tone({
 
 function StepFinal({ data }: { data: OnboardingData }) {
   const [showConfetti, setShowConfetti] = useState(false);
+  const router = useRouter();
 
-  useState(() => {
+  useEffect(() => {
     setShowConfetti(true);
-  });
+    
+    // Convert logo File to base64 and save data
+    const saveData = async () => {
+      let logoBase64: string | null = null;
+      
+      if (data.logo) {
+        const reader = new FileReader();
+        logoBase64 = await new Promise((resolve) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(data.logo as File);
+        });
+      }
+      
+      saveOnboardingData({
+        ...data,
+        logo: logoBase64,
+        password: "", // Don't store password
+      });
+    };
+    
+    saveData();
+  }, [data]);
+
+  const handleContinue = () => {
+    router.push("/dashboard");
+  };
 
   return (
     <StepWrapper 
@@ -905,7 +933,7 @@ function StepFinal({ data }: { data: OnboardingData }) {
           <p className="text-muted-foreground">
             Des publications suggérées vous attendent déjà dans votre tableau de bord !
           </p>
-          <Button size="lg" className="w-full h-14 text-lg font-semibold">
+          <Button size="lg" className="w-full h-14 text-lg font-semibold" onClick={handleContinue}>
             <Sparkles className="w-5 h-5 mr-2" />
             Découvrir mon espace
           </Button>
