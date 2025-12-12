@@ -18,6 +18,7 @@ export interface OnboardingData {
   interventionCity: string;
   tone: "pedagogique" | "direct" | "chaleureux";
   useEmojis: boolean;
+  publicationVoice: "je" | "on_nous";
 }
 
 const STORAGE_KEY = "publichantier_onboarding";
