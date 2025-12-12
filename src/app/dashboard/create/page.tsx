@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { getOnboardingData, type OnboardingData } from "@/lib/onboarding-storage";
 import {
   ArrowLeft,
@@ -17,19 +24,22 @@ import {
   Wand2,
   Image as ImageIcon,
   Video as VideoIcon,
-  Type,
-  Calendar,
-  Send,
-  Eye,
   Loader2,
-  CheckCircle2,
   X,
-  Plus,
   Camera,
   Film,
   ChevronRight,
   Briefcase,
   Megaphone,
+  Mic,
+  Type as TypeIcon,
+  Info,
+  Phone,
+  Mail,
+  MapPin,
+  Globe,
+  Check,
+  RefreshCw,
 } from "lucide-react";
 
 type MediaType = "photo" | "video" | null;
@@ -37,17 +47,20 @@ type IntentionType = "chantier" | "communication" | null;
 type PhotoSubType = "classique" | "avant-apres" | "montage" | null;
 type CommunicationSubType = "recrutement" | "actualite" | "annonce" | null;
 type VideoSubType = "classique" | "avant-apres" | "timelapse" | "montage" | null;
+type RetoucheLevel = "original" | "intense" | "smart";
 
 interface PublicationMedia {
   id: string;
   url: string;
   type: "image" | "video";
+  file: File;
 }
 
-interface Step {
+interface SocialNetwork {
   id: string;
-  title: string;
-  subtitle?: string;
+  name: string;
+  icon: string;
+  caption: string;
 }
 
 export default function CreatePublicationPage() {
@@ -62,16 +75,45 @@ export default function CreatePublicationPage() {
   const [communicationSubType, setCommunicationSubType] = useState<CommunicationSubType>(null);
   
   const [media, setMedia] = useState<PublicationMedia[]>([]);
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [scheduledDate, setScheduledDate] = useState("");
-  const [scheduledTime, setScheduledTime] = useState("");
+  const [descriptionMode, setDescriptionMode] = useState<"vocal" | "written" | null>(null);
+  const [vocalDescription, setVocalDescription] = useState("");
+  const [writtenDescription, setWrittenDescription] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [addCompanyInfo, setAddCompanyInfo] = useState(true);
+  const [showContactModal, setShowContactModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [retoucheLevel, setRetoucheLevel] = useState<RetoucheLevel>("smart");
+  const [generatedCaption, setGeneratedCaption] = useState("");
+  
+  const [socialNetworks, setSocialNetworks] = useState<SocialNetwork[]>([
+    { id: "instagram", name: "Instagram", icon: "📸", caption: "" },
+    { id: "facebook", name: "Facebook", icon: "👍", caption: "" },
+    { id: "linkedin", name: "LinkedIn", icon: "💼", caption: "" },
+  ]);
+  const [selectedNetwork, setSelectedNetwork] = useState("instagram");
+  
+  const [contactInfo, setContactInfo] = useState({
+    phone: "",
+    email: "",
+    address: "",
+    website: "",
+  });
+  
+  const recordingInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const data = getOnboardingData();
     setCompanyData(data);
+    if (data) {
+      setContactInfo({
+        phone: data.phone || "",
+        email: data.contactEmail || "",
+        address: data.address || "",
+        website: data.websiteUrl || "",
+      });
+    }
   }, []);
 
   const handleNext = () => setCurrentStep((s) => s + 1);
@@ -86,11 +128,21 @@ export default function CreatePublicationPage() {
   const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
+    
+    if (media.length + files.length > 10) {
+      alert("Maximum 10 photos autorisées");
+      return;
+    }
 
     Array.from(files).forEach((file) => {
       const url = URL.createObjectURL(file);
       const type = file.type.startsWith("image/") ? "image" : "video";
-      setMedia((prev) => [...prev, { id: Date.now().toString() + Math.random(), url, type }]);
+      setMedia((prev) => [...prev, { 
+        id: Date.now().toString() + Math.random(), 
+        url, 
+        type,
+        file 
+      }]);
     });
   };
 
@@ -98,25 +150,89 @@ export default function CreatePublicationPage() {
     setMedia((prev) => prev.filter((m) => m.id !== id));
   };
 
-  const handleGenerateContent = () => {
+  const handleStartRecording = () => {
+    setIsRecording(true);
+    setRecordingTime(0);
+    recordingInterval.current = setInterval(() => {
+      setRecordingTime((t) => t + 1);
+    }, 1000);
+  };
+
+  const handleStopRecording = () => {
+    setIsRecording(false);
+    if (recordingInterval.current) {
+      clearInterval(recordingInterval.current);
+    }
+    setVocalDescription("Transcription automatique : Rénovation complète d'une salle de bain à Paris 11ème, durée du chantier 3 semaines, client très satisfait...");
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleGeneratePublication = () => {
     setIsGenerating(true);
-
+    
     setTimeout(() => {
-      const mockContent = `✨ Transformation complète !
+      const baseCaption = `✨ Transformation complète !
 
-Avant : Un espace vieillissant qui nécessitait une rénovation
-Après : Un lieu moderne et chaleureux
-
-📍 ${companyData?.interventionCity || "Paris"}
-⏱️ Durée : 3 semaines
+${companyData?.useEmojis ? "📍 " : ""}${contactInfo.address || companyData?.interventionCity || "Paris"}
+${companyData?.useEmojis ? "⏱️ " : ""}Durée : 3 semaines
 ${companyData?.useEmojis ? "💪 " : ""}Travaux réalisés : démolition, plomberie, électricité, finitions
+${companyData?.useEmojis ? "😊 " : ""}Client satisfait à 100%
 
-${companyData?.useEmojis ? "👉 " : ""}Vous avez un projet similaire ? Contactez-nous !`;
+${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍 ${contactInfo.address}\n🌐 ${contactInfo.website}\n` : ""}
 
-      setContent(mockContent);
-      setTitle("Rénovation complète");
+#renovation #batiment #artisan #chantier #travaux #${companyData?.interventionCity?.toLowerCase().replace(/\s/g, "")}`;
+
+      setGeneratedCaption(baseCaption);
+      
+      setSocialNetworks([
+        { id: "instagram", name: "Instagram", icon: "📸", caption: baseCaption },
+        { id: "facebook", name: "Facebook", icon: "👍", caption: baseCaption.replace(/#/g, "") + "\n\nRetrouvez-nous sur Facebook pour plus de réalisations !" },
+        { id: "linkedin", name: "LinkedIn", icon: "💼", caption: "Projet de rénovation complète réalisé à " + (companyData?.interventionCity || "Paris") + ". Notre équipe a effectué une transformation complète en 3 semaines. Expertise en démolition, plomberie, électricité et finitions." },
+      ]);
+      
       setIsGenerating(false);
-    }, 2000);
+      setShowPreview(true);
+    }, 3000);
+  };
+
+  const handleRegenerateCaption = () => {
+    setIsGenerating(true);
+    setTimeout(() => {
+      const variations = [
+        "🏠 Avant/Après spectaculaire !",
+        "🔨 Nouveau projet terminé avec succès !",
+        "✅ Rénovation complète livrée !",
+      ];
+      const randomStart = variations[Math.floor(Math.random() * variations.length)];
+      setGeneratedCaption(randomStart + generatedCaption.substring(generatedCaption.indexOf("\n")));
+      
+      const currentNetwork = socialNetworks.find(n => n.id === selectedNetwork);
+      if (currentNetwork) {
+        setSocialNetworks(prev => prev.map(n => 
+          n.id === selectedNetwork 
+            ? { ...n, caption: randomStart + currentNetwork.caption.substring(currentNetwork.caption.indexOf("\n")) }
+            : n
+        ));
+      }
+      
+      setIsGenerating(false);
+    }, 1500);
+  };
+
+  const getCurrentCaption = () => {
+    const network = socialNetworks.find(n => n.id === selectedNetwork);
+    return network?.caption || generatedCaption;
+  };
+
+  const updateNetworkCaption = (caption: string) => {
+    setSocialNetworks(prev => prev.map(n => 
+      n.id === selectedNetwork ? { ...n, caption } : n
+    ));
   };
 
   return (
@@ -133,7 +249,8 @@ ${companyData?.useEmojis ? "👉 " : ""}Vous avez un projet similaire ? Contacte
                 {currentStep === 0 && "Choisissez le type de média"}
                 {currentStep === 1 && "Quelle est votre intention ?"}
                 {currentStep === 2 && "Précisez le type"}
-                {currentStep === 3 && "Ajoutez vos médias et contenu"}
+                {currentStep === 3 && "Ajoutez vos photos"}
+                {currentStep === 4 && "Décrivez votre publication"}
               </p>
             </div>
           </div>
@@ -442,233 +559,517 @@ ${companyData?.useEmojis ? "👉 " : ""}Vous avez un projet similaire ? Contacte
             </motion.div>
           )}
 
-          {/* Step 3: Vidéo chantier */}
-          {currentStep === 2 && intentionType === "chantier" && mediaType === "video" && (
+          {/* Step 3: Upload photos (1-10) */}
+          {currentStep === 3 && (
             <motion.div
-              key="step3-video-chantier"
+              key="step3-upload"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
               className="space-y-6"
             >
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-2">Type de vidéo chantier</h2>
-                <p className="text-muted-foreground">Choisissez le format vidéo</p>
+                <h2 className="text-3xl font-bold mb-2">Ajoutez vos photos</h2>
+                <p className="text-muted-foreground">
+                  De 1 à 10 photos maximum • {media.length}/10
+                </p>
               </div>
 
-              <div className="space-y-3 max-w-2xl mx-auto">
-                <motion.button
-                  onClick={() => {
-                    setVideoSubType("classique");
-                    handleNext();
-                  }}
-                  className="w-full p-6 rounded-xl border-2 border-border hover:border-primary transition-all text-left group"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors flex-shrink-0">
-                      <VideoIcon className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-bold text-lg mb-1">🎥 Vidéo classique</p>
-                      <p className="text-sm text-muted-foreground">
-                        Vidéo brute de votre chantier avec texte IA
-                      </p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                {media.map((item) => (
+                  <div key={item.id} className="relative aspect-square group">
+                    <img
+                      src={item.url}
+                      alt="Photo"
+                      className="w-full h-full object-cover rounded-xl border-2 border-border"
+                    />
+                    <button
+                      onClick={() => removeMedia(item.id)}
+                      className="absolute top-2 right-2 w-8 h-8 bg-destructive text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
                   </div>
-                </motion.button>
+                ))}
 
-                <motion.button
-                  onClick={() => {
-                    setVideoSubType("avant-apres");
-                    handleNext();
-                  }}
-                  className="w-full p-6 rounded-xl border-2 border-primary/50 bg-primary/5 hover:border-primary transition-all text-left group relative"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <Badge className="absolute top-3 right-3 bg-primary">⭐ Populaire</Badge>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center group-hover:bg-primary/30 transition-colors flex-shrink-0">
-                      <Sparkles className="w-6 h-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-bold text-lg mb-1">🏠 Avant / Après vidéo</p>
-                      <p className="text-sm text-muted-foreground">
-                        Comparaison animée ou split screen
-                      </p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                </motion.button>
-
-                <motion.button
-                  onClick={() => {
-                    setVideoSubType("timelapse");
-                    handleNext();
-                  }}
-                  className="w-full p-6 rounded-xl border-2 border-border hover:border-primary transition-all text-left group"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center group-hover:bg-green-500/20 transition-colors flex-shrink-0">
-                      <Film className="w-6 h-6 text-green-500" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-bold text-lg mb-1">⏱️ Timelapse</p>
-                      <p className="text-sm text-muted-foreground">
-                        Accéléré du chantier (vidéo ou photos assemblées)
-                      </p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                </motion.button>
-
-                <motion.button
-                  onClick={() => {
-                    setVideoSubType("montage");
-                    handleNext();
-                  }}
-                  className="w-full p-6 rounded-xl border-2 border-border hover:border-primary transition-all text-left group"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center group-hover:bg-purple-500/20 transition-colors flex-shrink-0">
-                      <Wand2 className="w-6 h-6 text-purple-500" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-bold text-lg mb-1">✨ Montage IA premium</p>
-                      <p className="text-sm text-muted-foreground">
-                        Vidéo stylisée cinématique avec overlay logo et couleurs
-                      </p>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                </motion.button>
+                {media.length < 10 && (
+                  <label className="aspect-square border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all">
+                    <Upload className="w-10 h-10 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground font-medium">
+                      Ajouter une photo
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleMediaUpload}
+                    />
+                  </label>
+                )}
               </div>
+
+              {media.length > 0 && (
+                <div className="flex justify-center">
+                  <Button size="lg" onClick={handleNext}>
+                    Continuer
+                    <ChevronRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              )}
             </motion.div>
           )}
 
-          {/* Step 4: Création finale */}
-          {currentStep === 3 && (
+          {/* Step 4: Description (vocal ou écrit) */}
+          {currentStep === 4 && !descriptionMode && (
             <motion.div
-              key="step4"
+              key="step4-choice"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
               className="space-y-6"
             >
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* Médias */}
-                <Card>
-                  <CardContent className="p-6 space-y-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <ImageIcon className="w-5 h-5 text-primary" />
-                      <h2 className="font-bold text-lg">
-                        {mediaType === "photo" ? "Photos" : "Vidéos"}
-                      </h2>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      {media.map((item) => (
-                        <div key={item.id} className="relative aspect-square group">
-                          <img
-                            src={item.url}
-                            alt="Media"
-                            className="w-full h-full object-cover rounded-xl border-2 border-border"
-                          />
-                          <button
-                            onClick={() => removeMedia(item.id)}
-                            className="absolute top-2 right-2 w-6 h-6 bg-destructive text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-
-                      <label className="aspect-square border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-primary/50 transition-colors">
-                        <Upload className="w-8 h-8 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">Ajouter</span>
-                        <input
-                          type="file"
-                          accept={mediaType === "photo" ? "image/*" : "video/*"}
-                          multiple
-                          className="hidden"
-                          onChange={handleMediaUpload}
-                        />
-                      </label>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Contenu */}
-                <Card>
-                  <CardContent className="p-6 space-y-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-5 h-5 text-primary" />
-                        <h2 className="font-bold text-lg">Contenu</h2>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleGenerateContent}
-                        disabled={isGenerating}
-                      >
-                        {isGenerating ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Génération...
-                          </>
-                        ) : (
-                          <>
-                            <Wand2 className="w-4 h-4 mr-2" />
-                            Générer
-                          </>
-                        )}
-                      </Button>
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium">Titre</Label>
-                      <Input
-                        placeholder="Titre..."
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="mt-1 h-12"
-                      />
-                    </div>
-
-                    <div>
-                      <Label className="text-sm font-medium">Description</Label>
-                      <Textarea
-                        placeholder="Décrivez votre publication..."
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        className="mt-1 min-h-[300px]"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-2">Comment voulez-vous décrire votre publication ?</h2>
+                <p className="text-muted-foreground">
+                  L'IA générera le texte final pour vous
+                </p>
               </div>
 
-              <div className="flex justify-end gap-3">
-                <Button variant="outline" size="lg">
-                  <Eye className="w-5 h-5 mr-2" />
-                  Aperçu
-                </Button>
-                <Button size="lg">
-                  <Send className="w-5 h-5 mr-2" />
-                  Publier
-                </Button>
+              <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                <motion.button
+                  onClick={() => setDescriptionMode("vocal")}
+                  className="p-8 rounded-2xl border-2 border-primary/50 bg-primary/5 hover:border-primary transition-all group relative"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Badge className="absolute top-3 right-3 bg-primary">⭐ Recommandé</Badge>
+                  <div className="text-center space-y-4">
+                    <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-primary/30 transition-colors">
+                      <Mic className="w-10 h-10 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold mb-1">🎙️ Vocal</p>
+                      <p className="text-sm text-muted-foreground">
+                        Plus rapide et naturel
+                      </p>
+                    </div>
+                  </div>
+                </motion.button>
+
+                <motion.button
+                  onClick={() => setDescriptionMode("written")}
+                  className="p-8 rounded-2xl border-2 border-border hover:border-primary transition-all group"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="text-center space-y-4">
+                    <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-primary/20 transition-colors">
+                      <TypeIcon className="w-10 h-10 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold mb-1">✍️ Écrit</p>
+                      <p className="text-sm text-muted-foreground">
+                        Rédigez vous-même
+                      </p>
+                    </div>
+                  </div>
+                </motion.button>
               </div>
             </motion.div>
           )}
+
+          {/* Step 4: Description vocale */}
+          {currentStep === 4 && descriptionMode === "vocal" && (
+            <motion.div
+              key="step4-vocal"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              className="space-y-6 max-w-2xl mx-auto"
+            >
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-2">Décrivez votre chantier</h2>
+                <p className="text-muted-foreground">
+                  Appuyez et parlez clairement
+                </p>
+              </div>
+
+              <Card className="p-6 bg-blue-50 border-blue-200">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-blue-900 mb-1">Pour booster le SEO :</p>
+                    <p className="text-sm text-blue-800">
+                      Mentionnez ville, travaux réalisés, durée du chantier, objectifs, satisfaction client...
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <div className="flex flex-col items-center gap-6 py-8">
+                {!isRecording && !vocalDescription && (
+                  <motion.button
+                    onClick={handleStartRecording}
+                    className="w-32 h-32 bg-primary rounded-full flex items-center justify-center group hover:scale-105 transition-all shadow-xl"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Mic className="w-16 h-16 text-white" />
+                  </motion.button>
+                )}
+
+                {isRecording && (
+                  <div className="text-center space-y-4">
+                    <motion.div
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ repeat: Infinity, duration: 1.5 }}
+                      className="w-32 h-32 bg-red-500 rounded-full flex items-center justify-center"
+                    >
+                      <Mic className="w-16 h-16 text-white" />
+                    </motion.div>
+                    <p className="text-2xl font-bold text-red-500">{formatTime(recordingTime)}</p>
+                    <Button onClick={handleStopRecording} variant="destructive" size="lg">
+                      Arrêter l'enregistrement
+                    </Button>
+                  </div>
+                )}
+
+                {vocalDescription && (
+                  <Card className="w-full p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Check className="w-5 h-5 text-green-500" />
+                      <p className="font-bold">Transcription terminée</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground bg-muted p-4 rounded-lg">
+                      {vocalDescription}
+                    </p>
+                    <div className="flex gap-3 mt-4">
+                      <Button variant="outline" onClick={() => {
+                        setVocalDescription("");
+                        setRecordingTime(0);
+                      }}>
+                        Recommencer
+                      </Button>
+                    </div>
+                  </Card>
+                )}
+              </div>
+
+              {vocalDescription && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-4 border-2 border-border rounded-xl">
+                    <Checkbox
+                      id="company-info"
+                      checked={addCompanyInfo}
+                      onCheckedChange={(checked) => {
+                        setAddCompanyInfo(checked as boolean);
+                        if (checked) {
+                          setShowContactModal(true);
+                        }
+                      }}
+                    />
+                    <Label htmlFor="company-info" className="font-medium cursor-pointer">
+                      Ajouter les coordonnées de mon entreprise à la publication
+                    </Label>
+                  </div>
+
+                  <Button size="lg" className="w-full" onClick={handleGeneratePublication}>
+                    Générer la publication
+                    <Sparkles className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Step 4: Description écrite */}
+          {currentStep === 4 && descriptionMode === "written" && (
+            <motion.div
+              key="step4-written"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              className="space-y-6 max-w-2xl mx-auto"
+            >
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-2">Rédigez votre description</h2>
+                <p className="text-muted-foreground">
+                  L'IA va améliorer et formater votre texte
+                </p>
+              </div>
+
+              <Card className="p-6 bg-blue-50 border-blue-200">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-blue-900 mb-1">Pour booster le SEO :</p>
+                    <p className="text-sm text-blue-800">
+                      Mentionnez ville, travaux réalisés, durée du chantier, objectifs, satisfaction client...
+                    </p>
+                  </div>
+                </div>
+              </Card>
+
+              <Textarea
+                placeholder="Exemple : Rénovation complète d'une salle de bain à Paris 11ème. Le chantier a duré 3 semaines. Nous avons fait la démolition, la plomberie, l'électricité et les finitions. Le client est très satisfait du résultat..."
+                value={writtenDescription}
+                onChange={(e) => setWrittenDescription(e.target.value)}
+                className="min-h-[200px] text-base"
+              />
+
+              {writtenDescription.trim() && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-4 border-2 border-border rounded-xl">
+                    <Checkbox
+                      id="company-info"
+                      checked={addCompanyInfo}
+                      onCheckedChange={(checked) => {
+                        setAddCompanyInfo(checked as boolean);
+                        if (checked) {
+                          setShowContactModal(true);
+                        }
+                      }}
+                    />
+                    <Label htmlFor="company-info" className="font-medium cursor-pointer">
+                      Ajouter les coordonnées de mon entreprise à la publication
+                    </Label>
+                  </div>
+
+                  <Button size="lg" className="w-full" onClick={handleGeneratePublication}>
+                    Générer la publication
+                    <Sparkles className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
+
+        {/* Modal confirmation coordonnées */}
+        <Dialog open={showContactModal} onOpenChange={setShowContactModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirmez vos coordonnées</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-2">
+                Ces informations seront ajoutées à votre publication
+              </p>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div>
+                <Label className="flex items-center gap-2 mb-2">
+                  <Phone className="w-4 h-4" /> Téléphone
+                </Label>
+                <Input
+                  value={contactInfo.phone}
+                  onChange={(e) => setContactInfo({ ...contactInfo, phone: e.target.value })}
+                  placeholder="01 23 45 67 89"
+                />
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-2 mb-2">
+                  <Mail className="w-4 h-4" /> Email
+                </Label>
+                <Input
+                  type="email"
+                  value={contactInfo.email}
+                  onChange={(e) => setContactInfo({ ...contactInfo, email: e.target.value })}
+                  placeholder="contact@entreprise.fr"
+                />
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-4 h-4" /> Adresse
+                </Label>
+                <Input
+                  value={contactInfo.address}
+                  onChange={(e) => setContactInfo({ ...contactInfo, address: e.target.value })}
+                  placeholder="15 Rue des Artisans, 75011 Paris"
+                />
+              </div>
+
+              <div>
+                <Label className="flex items-center gap-2 mb-2">
+                  <Globe className="w-4 h-4" /> Site internet
+                </Label>
+                <Input
+                  type="url"
+                  value={contactInfo.website}
+                  onChange={(e) => setContactInfo({ ...contactInfo, website: e.target.value })}
+                  placeholder="https://votre-site.fr"
+                />
+              </div>
+
+              <Button onClick={() => setShowContactModal(false)} className="w-full">
+                <Check className="w-4 h-4 mr-2" />
+                Confirmer
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Écran de chargement génération */}
+        <Dialog open={isGenerating && !showPreview} onOpenChange={() => {}}>
+          <DialogContent className="max-w-md" hideClose>
+            <div className="flex flex-col items-center justify-center py-8 space-y-6">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+              >
+                <Sparkles className="w-16 h-16 text-primary" />
+              </motion.div>
+              <div className="text-center">
+                <p className="text-xl font-bold mb-2">Génération en cours...</p>
+                <p className="text-sm text-muted-foreground">
+                  L'IA rédige votre publication professionnelle
+                </p>
+              </div>
+              <div className="w-full max-w-xs">
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-primary"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 3 }}
+                  />
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Aperçu de la publication */}
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Aperçu de votre publication</DialogTitle>
+              <p className="text-muted-foreground">
+                Modifiez si besoin avant de publier
+              </p>
+            </DialogHeader>
+
+            <div className="grid lg:grid-cols-2 gap-6 py-4">
+              {/* Photos avec sélecteur retouche */}
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-bold text-lg">
+                      {media.length} photo{media.length > 1 ? "s" : ""}
+                    </p>
+                    <Badge variant="outline" className="gap-1">
+                      <Check className="w-3 h-3" />
+                      {media.length}/10
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    {media.slice(0, 4).map((item) => (
+                      <div key={item.id} className="aspect-square rounded-lg overflow-hidden border-2 border-border">
+                        <img src={item.url} alt="Photo" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <Card className="p-4">
+                  <p className="font-medium mb-3">Niveau de retouche photo</p>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setRetoucheLevel("original")}
+                      className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
+                        retoucheLevel === "original"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <p className="font-semibold">📷 Original</p>
+                      <p className="text-xs text-muted-foreground">Photos non retouchées</p>
+                    </button>
+                    <button
+                      onClick={() => setRetoucheLevel("intense")}
+                      className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
+                        retoucheLevel === "intense"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <p className="font-semibold">✨ Intense</p>
+                      <p className="text-xs text-muted-foreground">Retouche modérée (lumière, contraste)</p>
+                    </button>
+                    <button
+                      onClick={() => setRetoucheLevel("smart")}
+                      className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
+                        retoucheLevel === "smart"
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <p className="font-semibold">🤖 Smart IA</p>
+                      <p className="text-xs text-muted-foreground">Retouche pro avancée</p>
+                    </button>
+                  </div>
+                </Card>
+              </div>
+
+              {/* Texte avec versions par réseau */}
+              <div className="space-y-4">
+                <div className="flex gap-2 mb-3">
+                  {socialNetworks.map((network) => (
+                    <button
+                      key={network.id}
+                      onClick={() => setSelectedNetwork(network.id)}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                        selectedNetwork === network.id
+                          ? "bg-primary text-white"
+                          : "bg-muted hover:bg-muted/80"
+                      }`}
+                    >
+                      {network.icon} {network.name}
+                    </button>
+                  ))}
+                </div>
+
+                <Card className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-bold">Texte de publication</p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRegenerateCaption}
+                      disabled={isGenerating}
+                    >
+                      {isGenerating ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                      )}
+                      Régénérer
+                    </Button>
+                  </div>
+
+                  <Textarea
+                    value={getCurrentCaption()}
+                    onChange={(e) => updateNetworkCaption(e.target.value)}
+                    className="min-h-[350px] font-mono text-sm"
+                  />
+                </Card>
+
+                <div className="flex gap-3">
+                  <Button variant="outline" className="flex-1">
+                    Aperçu
+                  </Button>
+                  <Button className="flex-1">
+                    Publier
+                    <Sparkles className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
