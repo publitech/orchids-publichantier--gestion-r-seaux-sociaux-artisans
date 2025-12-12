@@ -16,6 +16,7 @@ import {
   X,
   Users,
   ChevronRight,
+  Star,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -45,6 +46,13 @@ const menuItems = [
     icon: Calendar, 
     path: "/dashboard/calendar",
     description: "Planning éditorial"
+  },
+  { 
+    id: "reviews", 
+    label: "Avis", 
+    icon: Star, 
+    path: "/dashboard/reviews",
+    description: "Avis Google Business"
   },
   { 
     id: "competitors", 
