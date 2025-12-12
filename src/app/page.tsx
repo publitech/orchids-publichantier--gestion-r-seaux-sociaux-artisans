@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -918,7 +918,7 @@ function StepFinal({ data }: { data: OnboardingData }) {
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<OnboardingData>(initialData);
-  const step3ContinueRef = React.useRef<(() => void) | null>(null);
+  const step3ContinueRef = useRef<(() => void) | null>(null);
 
   const nextStep = () => setCurrentStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 0));
