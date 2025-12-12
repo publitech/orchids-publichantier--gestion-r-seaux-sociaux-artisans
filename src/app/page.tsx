@@ -291,10 +291,27 @@ function Step3MagicOnboarding({
 }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [websiteScreenshot, setWebsiteScreenshot] = useState<string | null>(null);
+  const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
 
-  const handleAnalyze = () => {
+  const handleVerifyWebsite = () => {
     if (!data.websiteUrl) return;
+    
+    setIsLoadingScreenshot(true);
+    setShowVerificationModal(true);
+    
+    // Simuler le chargement d'une capture d'écran
+    setTimeout(() => {
+      setWebsiteScreenshot(`https://api.screenshotmachine.com/?key=demo&url=${encodeURIComponent(data.websiteUrl)}&dimension=1024x768`);
+      setIsLoadingScreenshot(false);
+    }, 1500);
+  };
+
+  const handleConfirmWebsite = () => {
+    setShowVerificationModal(false);
     setIsAnalyzing(true);
+    
     setTimeout(() => {
       setData({
         ...data,
@@ -308,13 +325,33 @@ function Step3MagicOnboarding({
     }, 2500);
   };
 
+  const handleRejectWebsite = () => {
+    setShowVerificationModal(false);
+    setWebsiteScreenshot(null);
+  };
+
   return (
     <StepWrapper 
       title="Avez-vous un site internet ?" 
-      subtitle="On peut récupérer automatiquement vos informations"
+      subtitle="Laissez la magie opérer ✨"
       icon={Globe}
     >
       <div className="space-y-6">
+        <div className="p-5 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl border border-primary/20">
+          <div className="flex items-start gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+              <Wand2 className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground mb-1">Magic Onboarding</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Entrez l'URL de votre site et nous analyserons automatiquement vos informations 
+                (adresse, contact, description...) pour gagner du temps !
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="relative">
           <Input
             type="url"
@@ -330,20 +367,10 @@ function Step3MagicOnboarding({
             <Button
               size="sm"
               className="absolute right-2 top-1/2 -translate-y-1/2"
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
+              onClick={handleVerifyWebsite}
             >
-              {isAnalyzing ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Analyse...
-                </>
-              ) : (
-                <>
-                  <Wand2 className="w-4 h-4 mr-2" />
-                  Analyser
-                </>
-              )}
+              <Wand2 className="w-4 h-4 mr-2" />
+              Vérifier
             </Button>
           )}
         </div>
@@ -364,12 +391,87 @@ function Step3MagicOnboarding({
           </motion.div>
         )}
 
-        <div className="text-center">
+        {isAnalyzing && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-primary/5 border border-primary/20 rounded-xl"
+          >
+            <div className="flex items-center gap-3">
+              <Loader2 className="w-5 h-5 text-primary animate-spin flex-shrink-0" />
+              <div>
+                <p className="font-medium text-foreground">Analyse en cours...</p>
+                <p className="text-sm text-muted-foreground">Extraction des informations de votre site</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        <div className="text-center p-4 bg-muted/50 rounded-xl">
           <p className="text-sm text-muted-foreground">
-            Pas de site ? Pas de souci, vous pourrez tout remplir manuellement.
+            <span className="font-medium text-foreground">Pas de site web ?</span> Aucun problème ! <br/>
+            Vous pourrez remplir toutes les informations manuellement à l'étape suivante.
           </p>
         </div>
       </div>
+
+      <Dialog open={showVerificationModal} onOpenChange={setShowVerificationModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+              <Globe className="w-6 h-6 text-primary" />
+              C'est bien votre site ?
+            </DialogTitle>
+            <p className="text-muted-foreground mt-2">
+              Vérifiez que nous avons trouvé le bon site internet avant de continuer
+            </p>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <div className="relative aspect-video bg-muted rounded-xl overflow-hidden border-2 border-border">
+              {isLoadingScreenshot ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                  <p className="text-sm text-muted-foreground">Chargement de la capture d'écran...</p>
+                </div>
+              ) : websiteScreenshot ? (
+                <img 
+                  src={websiteScreenshot} 
+                  alt="Capture d'écran du site" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback si l'image ne charge pas
+                    e.currentTarget.src = `https://placehold.co/1024x768/212737/ffffff?text=${encodeURIComponent(data.websiteUrl)}`;
+                  }}
+                />
+              ) : null}
+            </div>
+
+            <div className="p-4 bg-muted/50 rounded-xl">
+              <p className="text-sm font-medium text-foreground mb-1">URL vérifiée :</p>
+              <p className="text-sm text-primary font-mono">{data.websiteUrl}</p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 h-14 text-base"
+                onClick={handleRejectWebsite}
+              >
+                <X className="w-5 h-5 mr-2" />
+                Non, ce n'est pas ça
+              </Button>
+              <Button
+                className="flex-1 h-14 text-base font-semibold"
+                onClick={handleConfirmWebsite}
+              >
+                <Check className="w-5 h-5 mr-2" />
+                Oui, c'est bien mon site !
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </StepWrapper>
   );
 }
