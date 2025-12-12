@@ -32,6 +32,9 @@ import {
   Eye,
   Calendar,
   Loader2,
+  Target,
+  BarChart3,
+  Globe,
 } from "lucide-react";
 
 interface Competitor {
