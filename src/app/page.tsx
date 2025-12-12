@@ -9,6 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { 
   Building2, 
   Globe, 
   MapPin, 
@@ -24,7 +30,8 @@ import {
   Loader2,
   Upload,
   Wand2,
-  Target
+  Target,
+  X
 } from "lucide-react";
 
 const TOTAL_STEPS = 8;
