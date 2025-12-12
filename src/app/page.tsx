@@ -461,6 +461,27 @@ function Step4CompanyInfo({
   data: OnboardingData; 
   setData: (d: OnboardingData) => void;
 }) {
+  const extractCityFromAddress = (address: string): string => {
+    const parts = address.split(',');
+    if (parts.length >= 2) {
+      const cityPart = parts[parts.length - 1].trim();
+      const cityMatch = cityPart.match(/^\d{5}\s+(.+)$/);
+      if (cityMatch) {
+        return cityMatch[1];
+      }
+      return cityPart;
+    }
+    return "";
+  };
+
+  const handleAddressChange = (newAddress: string) => {
+    setData({ 
+      ...data, 
+      address: newAddress,
+      interventionCity: extractCityFromAddress(newAddress)
+    });
+  };
+
   return (
     <StepWrapper 
       title="Les informations de votre entreprise" 
@@ -475,7 +496,7 @@ function Step4CompanyInfo({
           <Input
             placeholder="15 Rue des Artisans, 75011 Paris"
             value={data.address}
-            onChange={(e) => setData({ ...data, address: e.target.value })}
+            onChange={(e) => handleAddressChange(e.target.value)}
             className="h-12 mt-1"
           />
         </div>
@@ -517,7 +538,78 @@ function Step4CompanyInfo({
   );
 }
 
-function Step5PersonalInfo({ 
+function Step5InterventionZone({ 
+  data, 
+  setData 
+}: { 
+  data: OnboardingData; 
+  setData: (d: OnboardingData) => void;
+}) {
+  const quickDistances = [10, 15, 30, 50];
+
+  return (
+    <StepWrapper 
+      title="Votre zone d'intervention" 
+      subtitle="Où intervenez-vous principalement ?"
+      icon={Target}
+    >
+      <div className="space-y-6">
+        <div>
+          <Label className="text-sm font-medium">Ville principale</Label>
+          <Input
+            placeholder="Paris"
+            value={data.interventionCity}
+            onChange={(e) => setData({ ...data, interventionCity: e.target.value })}
+            className="h-12 mt-1"
+          />
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-3 block">
+            Rayon d'intervention : <span className="text-primary font-bold">{data.interventionRadius} km</span>
+          </Label>
+          
+          <div className="flex gap-2 mb-4">
+            {quickDistances.map((distance) => (
+              <Button
+                key={distance}
+                variant={data.interventionRadius === distance ? "default" : "outline"}
+                size="sm"
+                onClick={() => setData({ ...data, interventionRadius: distance })}
+                className="flex-1"
+              >
+                {distance} km
+              </Button>
+            ))}
+          </div>
+
+          <input
+            type="range"
+            min="1"
+            max="100"
+            value={data.interventionRadius}
+            onChange={(e) => setData({ ...data, interventionRadius: parseInt(e.target.value) })}
+            className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
+          />
+          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+            <span>1 km</span>
+            <span>+ de 100 km</span>
+          </div>
+        </div>
+
+        <div className="aspect-video bg-muted rounded-xl flex items-center justify-center border-2 border-dashed border-border">
+          <div className="text-center text-muted-foreground">
+            <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">Carte interactive</p>
+            <p className="text-xs">(Visualisation de la zone)</p>
+          </div>
+        </div>
+      </div>
+    </StepWrapper>
+  );
+}
+
+function Step6PersonalInfo({ 
   data, 
   setData 
 }: { 
@@ -568,7 +660,7 @@ function Step5PersonalInfo({
   );
 }
 
-function Step6LogoColors({ 
+function Step7LogoColors({ 
   data, 
   setData 
 }: { 
@@ -818,60 +910,6 @@ function Step6LogoColors({
   );
 }
 
-function Step7InterventionZone({ 
-  data, 
-  setData 
-}: { 
-  data: OnboardingData; 
-  setData: (d: OnboardingData) => void;
-}) {
-  return (
-    <StepWrapper 
-      title="Votre zone d'intervention" 
-      subtitle="Où intervenez-vous principalement ?"
-      icon={Target}
-    >
-      <div className="space-y-6">
-        <div>
-          <Label className="text-sm font-medium">Ville principale</Label>
-          <Input
-            placeholder="Paris"
-            value={data.interventionCity}
-            onChange={(e) => setData({ ...data, interventionCity: e.target.value })}
-            className="h-12 mt-1"
-          />
-        </div>
-
-        <div>
-          <Label className="text-sm font-medium mb-3 block">
-            Rayon d'intervention : <span className="text-primary font-bold">{data.interventionRadius} km</span>
-          </Label>
-          <input
-            type="range"
-            min="5"
-            max="100"
-            value={data.interventionRadius}
-            onChange={(e) => setData({ ...data, interventionRadius: parseInt(e.target.value) })}
-            className="w-full h-2 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>5 km</span>
-            <span>100 km</span>
-          </div>
-        </div>
-
-        <div className="aspect-video bg-muted rounded-xl flex items-center justify-center border-2 border-dashed border-border">
-          <div className="text-center text-muted-foreground">
-            <MapPin className="w-12 h-12 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Carte interactive</p>
-            <p className="text-xs">(Visualisation de la zone)</p>
-          </div>
-        </div>
-      </div>
-    </StepWrapper>
-  );
-}
-
 function Step8Tone({ 
   data, 
   setData 
@@ -1095,13 +1133,13 @@ export default function OnboardingPage() {
             <Step4CompanyInfo key="step4" data={data} setData={setData} />
           )}
           {currentStep === 4 && (
-            <Step5PersonalInfo key="step5" data={data} setData={setData} />
+            <Step5InterventionZone key="step5" data={data} setData={setData} />
           )}
           {currentStep === 5 && (
-            <Step6LogoColors key="step6" data={data} setData={setData} />
+            <Step6PersonalInfo key="step6" data={data} setData={setData} />
           )}
           {currentStep === 6 && (
-            <Step7InterventionZone key="step7" data={data} setData={setData} />
+            <Step7LogoColors key="step7" data={data} setData={setData} />
           )}
           {currentStep === 7 && (
             <Step8Tone key="step8" data={data} setData={setData} />
