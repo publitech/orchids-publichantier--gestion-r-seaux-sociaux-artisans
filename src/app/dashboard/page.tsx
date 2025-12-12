@@ -28,6 +28,7 @@ import {
   Share2,
   ImagePlus,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const mockSuggestedPosts = [
   {
@@ -279,7 +280,7 @@ export default function DashboardPage() {
               <Button variant="outline" size="icon">
                 <Bell className="w-5 h-5" />
               </Button>
-              <Button>
+              <Button onClick={() => router.push("/dashboard/create")}>
                 <Plus className="w-5 h-5 mr-2" />
                 Nouvelle publication
               </Button>
