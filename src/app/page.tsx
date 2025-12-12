@@ -36,7 +36,7 @@ import {
   X
 } from "lucide-react";
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 10;
 
 interface OnboardingData {
   authMethod: "google" | "email" | null;
@@ -58,6 +58,7 @@ interface OnboardingData {
   interventionCity: string;
   tone: "pedagogique" | "direct" | "chaleureux";
   useEmojis: boolean;
+  publicationVoice: "je" | "on_nous";
 }
 
 const initialData: OnboardingData = {
@@ -80,6 +81,7 @@ const initialData: OnboardingData = {
   interventionCity: "",
   tone: "chaleureux",
   useEmojis: true,
+  publicationVoice: "je",
 };
 
 function ProgressBar({ currentStep }: { currentStep: number }) {
@@ -609,7 +611,113 @@ function Step5InterventionZone({
   );
 }
 
-function Step6PersonalInfo({ 
+function Step6Tone({ 
+  data, 
+  setData 
+}: { 
+  data: OnboardingData; 
+  setData: (d: OnboardingData) => void;
+}) {
+  const tones = [
+    { id: "pedagogique" as const, label: "Pédagogique", emoji: "📚", description: "Expliquez et éduquez vos clients" },
+    { id: "direct" as const, label: "Direct", emoji: "💪", description: "Allez droit au but, efficace" },
+    { id: "chaleureux" as const, label: "Chaleureux", emoji: "😊", description: "Créez une relation de confiance" },
+  ];
+
+  return (
+    <StepWrapper 
+      title="Le ton de vos publications" 
+      subtitle="Comment voulez-vous communiquer ?"
+      icon={MessageSquare}
+    >
+      <div className="space-y-3">
+        {tones.map((tone) => (
+          <motion.button
+            key={tone.id}
+            onClick={() => setData({ ...data, tone: tone.id })}
+            className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+              data.tone === tone.id
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50"
+            }`}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">{tone.emoji}</span>
+              <div>
+                <p className="font-semibold">{tone.label}</p>
+                <p className="text-sm text-muted-foreground">{tone.description}</p>
+              </div>
+              {data.tone === tone.id && (
+                <Check className="w-5 h-5 text-primary ml-auto" />
+              )}
+            </div>
+          </motion.button>
+        ))}
+      </div>
+    </StepWrapper>
+  );
+}
+
+function Step7Voice({ 
+  data, 
+  setData 
+}: { 
+  data: OnboardingData; 
+  setData: (d: OnboardingData) => void;
+}) {
+  const voices = [
+    { 
+      id: "je" as const, 
+      label: "Je", 
+      example: "Je viens de terminer la réfection complète de cette toiture. Un travail solide et durable." 
+    },
+    { 
+      id: "on_nous" as const, 
+      label: "On / Nous", 
+      example: "On a refait toute la toiture. Un chantier solide qui tiendra des années." 
+    },
+  ];
+
+  return (
+    <StepWrapper 
+      title="En quel nom parler dans vos publications ?" 
+      subtitle="Choisissez la voix qui représente le mieux votre entreprise"
+      icon={User}
+    >
+      <div className="space-y-3">
+        {voices.map((voice) => (
+          <motion.button
+            key={voice.id}
+            onClick={() => setData({ ...data, publicationVoice: voice.id })}
+            className={`w-full p-5 rounded-xl border-2 text-left transition-all ${
+              data.publicationVoice === voice.id
+                ? "border-primary bg-primary/5"
+                : "border-border hover:border-primary/50"
+            }`}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <p className="font-bold text-lg">{voice.label}</p>
+                {data.publicationVoice === voice.id && (
+                  <Check className="w-5 h-5 text-primary ml-auto" />
+                )}
+              </div>
+              <div className="pl-3 border-l-4 border-primary/30">
+                <p className="text-sm text-muted-foreground italic">
+                  Exemple : "{voice.example}"
+                </p>
+              </div>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+    </StepWrapper>
+  );
+}
+
+function Step8Emojis({ 
   data, 
   setData 
 }: { 
@@ -618,49 +726,58 @@ function Step6PersonalInfo({
 }) {
   return (
     <StepWrapper 
-      title="Vos informations personnelles" 
-      subtitle="Pour personnaliser votre expérience"
-      icon={User}
+      title="Utilisation des émojis" 
+      subtitle="Rendez vos publications plus vivantes et expressives"
+      icon={Sparkles}
     >
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label className="text-sm font-medium">Prénom</Label>
-            <Input
-              placeholder="Jean"
-              value={data.ownerFirstName}
-              onChange={(e) => setData({ ...data, ownerFirstName: e.target.value })}
-              className="h-12 mt-1"
-            />
+      <div className="space-y-3">
+        <motion.button
+          onClick={() => setData({ ...data, useEmojis: true })}
+          className={`w-full p-5 rounded-xl border-2 text-left transition-all ${
+            data.useEmojis
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-primary/50"
+          }`}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">✨</span>
+            <div className="flex-1">
+              <p className="font-semibold">Oui, j'aime les émojis</p>
+              <p className="text-sm text-muted-foreground">Ajoutez une touche conviviale à vos publications</p>
+            </div>
+            {data.useEmojis && (
+              <Check className="w-5 h-5 text-primary" />
+            )}
           </div>
-          <div>
-            <Label className="text-sm font-medium">Nom</Label>
-            <Input
-              placeholder="Martin"
-              value={data.ownerLastName}
-              onChange={(e) => setData({ ...data, ownerLastName: e.target.value })}
-              className="h-12 mt-1"
-            />
+        </motion.button>
+
+        <motion.button
+          onClick={() => setData({ ...data, useEmojis: false })}
+          className={`w-full p-5 rounded-xl border-2 text-left transition-all ${
+            !data.useEmojis
+              ? "border-primary bg-primary/5"
+              : "border-border hover:border-primary/50"
+          }`}
+          whileTap={{ scale: 0.98 }}
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">📝</span>
+            <div className="flex-1">
+              <p className="font-semibold">Non, style sobre</p>
+              <p className="text-sm text-muted-foreground">Gardez un ton professionnel sans émojis</p>
+            </div>
+            {!data.useEmojis && (
+              <Check className="w-5 h-5 text-primary" />
+            )}
           </div>
-        </div>
-        <div>
-          <Label className="text-sm font-medium flex items-center gap-2">
-            <Phone className="w-4 h-4" /> Téléphone personnel
-          </Label>
-          <Input
-            type="tel"
-            placeholder="06 12 34 56 78"
-            value={data.ownerPhone}
-            onChange={(e) => setData({ ...data, ownerPhone: e.target.value })}
-            className="h-12 mt-1"
-          />
-        </div>
+        </motion.button>
       </div>
     </StepWrapper>
   );
 }
 
-function Step7LogoColors({ 
+function Step9LogoColors({ 
   data, 
   setData 
 }: { 
@@ -910,61 +1027,50 @@ function Step7LogoColors({
   );
 }
 
-function Step8Tone({ 
+function Step10PersonalInfo({ 
   data, 
   setData 
 }: { 
   data: OnboardingData; 
   setData: (d: OnboardingData) => void;
 }) {
-  const tones = [
-    { id: "pedagogique" as const, label: "Pédagogique", emoji: "📚", description: "Expliquez et éduquez vos clients" },
-    { id: "direct" as const, label: "Direct", emoji: "💪", description: "Allez droit au but, efficace" },
-    { id: "chaleureux" as const, label: "Chaleureux", emoji: "😊", description: "Créez une relation de confiance" },
-  ];
-
   return (
     <StepWrapper 
-      title="Le ton de vos publications" 
-      subtitle="Comment voulez-vous communiquer ?"
-      icon={MessageSquare}
+      title="Vos informations personnelles" 
+      subtitle="Pour personnaliser votre expérience"
+      icon={User}
     >
-      <div className="space-y-6">
-        <div className="space-y-3">
-          {tones.map((tone) => (
-            <motion.button
-              key={tone.id}
-              onClick={() => setData({ ...data, tone: tone.id })}
-              className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-                data.tone === tone.id
-                  ? "border-primary bg-primary/5"
-                  : "border-border hover:border-primary/50"
-              }`}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{tone.emoji}</span>
-                <div>
-                  <p className="font-semibold">{tone.label}</p>
-                  <p className="text-sm text-muted-foreground">{tone.description}</p>
-                </div>
-                {data.tone === tone.id && (
-                  <Check className="w-5 h-5 text-primary ml-auto" />
-                )}
-              </div>
-            </motion.button>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between p-4 bg-muted rounded-xl">
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="font-medium">Utiliser des émojis</p>
-            <p className="text-sm text-muted-foreground">Rendez vos publications plus vivantes</p>
+            <Label className="text-sm font-medium">Prénom</Label>
+            <Input
+              placeholder="Jean"
+              value={data.ownerFirstName}
+              onChange={(e) => setData({ ...data, ownerFirstName: e.target.value })}
+              className="h-12 mt-1 bg-white"
+            />
           </div>
-          <Checkbox
-            checked={data.useEmojis}
-            onCheckedChange={(checked) => setData({ ...data, useEmojis: checked as boolean })}
-            className="w-6 h-6"
+          <div>
+            <Label className="text-sm font-medium">Nom</Label>
+            <Input
+              placeholder="Martin"
+              value={data.ownerLastName}
+              onChange={(e) => setData({ ...data, ownerLastName: e.target.value })}
+              className="h-12 mt-1 bg-white"
+            />
+          </div>
+        </div>
+        <div>
+          <Label className="text-sm font-medium flex items-center gap-2">
+            <Phone className="w-4 h-4" /> Téléphone personnel
+          </Label>
+          <Input
+            type="tel"
+            placeholder="06 12 34 56 78"
+            value={data.ownerPhone}
+            onChange={(e) => setData({ ...data, ownerPhone: e.target.value })}
+            className="h-12 mt-1 bg-white"
           />
         </div>
       </div>
@@ -1073,6 +1179,8 @@ export default function OnboardingPage() {
       case 5: return true;
       case 6: return true;
       case 7: return true;
+      case 8: return true;
+      case 9: return true;
       default: return true;
     }
   };
@@ -1122,13 +1230,19 @@ export default function OnboardingPage() {
             <Step5InterventionZone key="step5" data={data} setData={setData} />
           )}
           {currentStep === 5 && (
-            <Step6PersonalInfo key="step6" data={data} setData={setData} />
+            <Step6Tone key="step6" data={data} setData={setData} />
           )}
           {currentStep === 6 && (
-            <Step7LogoColors key="step7" data={data} setData={setData} />
+            <Step7Voice key="step7" data={data} setData={setData} />
           )}
           {currentStep === 7 && (
-            <Step8Tone key="step8" data={data} setData={setData} />
+            <Step8Emojis key="step8" data={data} setData={setData} />
+          )}
+          {currentStep === 8 && (
+            <Step9LogoColors key="step9" data={data} setData={setData} />
+          )}
+          {currentStep === 9 && (
+            <Step10PersonalInfo key="step10" data={data} setData={setData} />
           )}
           {currentStep === TOTAL_STEPS - 1 && (
             <StepFinal key="final" data={data} />
