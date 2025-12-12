@@ -911,6 +911,12 @@ function Step9LogoColors({
       icon={Palette}
     >
       <div className="space-y-6">
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+          <p className="text-sm text-blue-900">
+            <span className="font-semibold">💡 Pas de logo sous la main ?</span> Aucun problème ! Vous pourrez ajouter ou modifier votre logo et vos couleurs plus tard dans les paramètres.
+          </p>
+        </div>
+
         <div>
           <Label className="text-sm font-medium mb-3 block">Logo de votre entreprise</Label>
           <div className="flex items-center gap-4">
