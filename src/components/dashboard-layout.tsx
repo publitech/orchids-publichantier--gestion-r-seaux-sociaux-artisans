@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getOnboardingData, type OnboardingData } from "@/lib/onboarding-storage";
 import {
   LayoutDashboard,
+  Sparkles,
   FileText,
   Calendar,
   Settings,
@@ -34,11 +35,18 @@ const menuItems = [
     description: "Vue d'ensemble"
   },
   { 
-    id: "publications", 
-    label: "Publications", 
+    id: "publications-pretes", 
+    label: "Publications Prêtes", 
+    icon: Sparkles, 
+    path: "/dashboard/publications-pretes",
+    description: "Prêtes à publier"
+  },
+  { 
+    id: "historique", 
+    label: "Historique", 
     icon: FileText, 
     path: "/dashboard/publications",
-    description: "Gérer vos posts"
+    description: "Publications publiées"
   },
   { 
     id: "calendar", 
