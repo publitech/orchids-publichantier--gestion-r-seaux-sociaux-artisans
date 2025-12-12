@@ -620,69 +620,10 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
             </motion.div>
           )}
 
-          {/* Step 4: Description (vocal ou écrit) */}
-          {currentStep === 4 && !descriptionMode && (
+          {/* Step 4: Description (vocal ET écrit sur même page) */}
+          {currentStep === 4 && (
             <motion.div
-              key="step4-choice"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6"
-            >
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-2">Comment voulez-vous décrire votre publication ?</h2>
-                <p className="text-muted-foreground">
-                  L'IA générera le texte final pour vous
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                <motion.button
-                  onClick={() => setDescriptionMode("vocal")}
-                  className="p-8 rounded-2xl border-2 border-primary/50 bg-primary/5 hover:border-primary transition-all group relative"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Badge className="absolute top-3 right-3 bg-primary">⭐ Recommandé</Badge>
-                  <div className="text-center space-y-4">
-                    <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-primary/30 transition-colors">
-                      <Mic className="w-10 h-10 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold mb-1">🎙️ Vocal</p>
-                      <p className="text-sm text-muted-foreground">
-                        Plus rapide et naturel
-                      </p>
-                    </div>
-                  </div>
-                </motion.button>
-
-                <motion.button
-                  onClick={() => setDescriptionMode("written")}
-                  className="p-8 rounded-2xl border-2 border-border hover:border-primary transition-all group"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="text-center space-y-4">
-                    <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto group-hover:bg-primary/20 transition-colors">
-                      <TypeIcon className="w-10 h-10 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold mb-1">✍️ Écrit</p>
-                      <p className="text-sm text-muted-foreground">
-                        Rédigez vous-même
-                      </p>
-                    </div>
-                  </div>
-                </motion.button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Step 4: Description vocale */}
-          {currentStep === 4 && descriptionMode === "vocal" && (
-            <motion.div
-              key="step4-vocal"
+              key="step4-description"
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
@@ -691,7 +632,7 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold mb-2">Décrivez votre chantier</h2>
                 <p className="text-muted-foreground">
-                  Appuyez et parlez clairement
+                  Choisissez votre méthode préférée
                 </p>
               </div>
 
@@ -707,118 +648,104 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
                 </div>
               </Card>
 
-              <div className="flex flex-col items-center gap-6 py-8">
-                {!isRecording && !vocalDescription && (
-                  <motion.button
-                    onClick={handleStartRecording}
-                    className="w-32 h-32 bg-primary rounded-full flex items-center justify-center group hover:scale-105 transition-all shadow-xl"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Mic className="w-16 h-16 text-white" />
-                  </motion.button>
-                )}
+              {/* Onglets Vocal / Écrit */}
+              <div className="flex gap-3 p-1.5 bg-muted rounded-xl">
+                <button
+                  onClick={() => setDescriptionMode("vocal")}
+                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    descriptionMode === "vocal" 
+                      ? "bg-primary text-white shadow-lg" 
+                      : "hover:bg-background"
+                  }`}
+                >
+                  <Mic className="w-5 h-5" />
+                  Description vocale
+                </button>
+                <button
+                  onClick={() => setDescriptionMode("written")}
+                  className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                    descriptionMode === "written" 
+                      ? "bg-primary text-white shadow-lg" 
+                      : "hover:bg-background"
+                  }`}
+                >
+                  <TypeIcon className="w-5 h-5" />
+                  Description écrite
+                </button>
+              </div>
 
-                {isRecording && (
-                  <div className="text-center space-y-4">
-                    <motion.div
-                      animate={{ scale: [1, 1.1, 1] }}
-                      transition={{ repeat: Infinity, duration: 1.5 }}
-                      className="w-32 h-32 bg-red-500 rounded-full flex items-center justify-center"
+              {/* Zone vocale */}
+              {descriptionMode === "vocal" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex flex-col items-center gap-6 py-8"
+                >
+                  {!isRecording && !vocalDescription && (
+                    <motion.button
+                      onClick={handleStartRecording}
+                      className="w-32 h-32 bg-primary rounded-full flex items-center justify-center group hover:scale-105 transition-all shadow-xl"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       <Mic className="w-16 h-16 text-white" />
-                    </motion.div>
-                    <p className="text-2xl font-bold text-red-500">{formatTime(recordingTime)}</p>
-                    <Button onClick={handleStopRecording} variant="destructive" size="lg">
-                      Arrêter l'enregistrement
-                    </Button>
-                  </div>
-                )}
+                    </motion.button>
+                  )}
 
-                {vocalDescription && (
-                  <Card className="w-full p-6">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Check className="w-5 h-5 text-green-500" />
-                      <p className="font-bold">Transcription terminée</p>
-                    </div>
-                    <p className="text-sm text-muted-foreground bg-muted p-4 rounded-lg">
-                      {vocalDescription}
-                    </p>
-                    <div className="flex gap-3 mt-4">
-                      <Button variant="outline" onClick={() => {
-                        setVocalDescription("");
-                        setRecordingTime(0);
-                      }}>
-                        Recommencer
+                  {isRecording && (
+                    <div className="text-center space-y-4">
+                      <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                        className="w-32 h-32 bg-red-500 rounded-full flex items-center justify-center"
+                      >
+                        <Mic className="w-16 h-16 text-white" />
+                      </motion.div>
+                      <p className="text-2xl font-bold text-red-500">{formatTime(recordingTime)}</p>
+                      <Button onClick={handleStopRecording} variant="destructive" size="lg">
+                        Arrêter l'enregistrement
                       </Button>
                     </div>
-                  </Card>
-                )}
-              </div>
+                  )}
 
-              {vocalDescription && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 border-2 border-border rounded-xl">
-                    <Checkbox
-                      id="company-info"
-                      checked={addCompanyInfo}
-                      onCheckedChange={(checked) => {
-                        setAddCompanyInfo(checked as boolean);
-                        if (checked) {
-                          setShowContactModal(true);
-                        }
-                      }}
-                    />
-                    <Label htmlFor="company-info" className="font-medium cursor-pointer">
-                      Ajouter les coordonnées de mon entreprise à la publication
-                    </Label>
-                  </div>
-
-                  <Button size="lg" className="w-full" onClick={handleGeneratePublication}>
-                    Générer la publication
-                    <Sparkles className="w-5 h-5 ml-2" />
-                  </Button>
-                </div>
+                  {vocalDescription && (
+                    <Card className="w-full p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Check className="w-5 h-5 text-green-500" />
+                        <p className="font-bold">Transcription terminée</p>
+                      </div>
+                      <p className="text-sm text-muted-foreground bg-muted p-4 rounded-lg">
+                        {vocalDescription}
+                      </p>
+                      <div className="flex gap-3 mt-4">
+                        <Button variant="outline" onClick={() => {
+                          setVocalDescription("");
+                          setRecordingTime(0);
+                        }}>
+                          Recommencer
+                        </Button>
+                      </div>
+                    </Card>
+                  )}
+                </motion.div>
               )}
-            </motion.div>
-          )}
 
-          {/* Step 4: Description écrite */}
-          {currentStep === 4 && descriptionMode === "written" && (
-            <motion.div
-              key="step4-written"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              className="space-y-6 max-w-2xl mx-auto"
-            >
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-2">Rédigez votre description</h2>
-                <p className="text-muted-foreground">
-                  L'IA va améliorer et formater votre texte
-                </p>
-              </div>
+              {/* Zone écrite */}
+              {descriptionMode === "written" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Textarea
+                    placeholder="Exemple : Rénovation complète d'une salle de bain à Paris 11ème. Le chantier a duré 3 semaines. Nous avons fait la démolition, la plomberie, l'électricité et les finitions. Le client est très satisfait du résultat..."
+                    value={writtenDescription}
+                    onChange={(e) => setWrittenDescription(e.target.value)}
+                    className="min-h-[200px] text-base"
+                  />
+                </motion.div>
+              )}
 
-              <Card className="p-6 bg-blue-50 border-blue-200">
-                <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-blue-900 mb-1">Pour booster le SEO :</p>
-                    <p className="text-sm text-blue-800">
-                      Mentionnez ville, travaux réalisés, durée du chantier, objectifs, satisfaction client...
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              <Textarea
-                placeholder="Exemple : Rénovation complète d'une salle de bain à Paris 11ème. Le chantier a duré 3 semaines. Nous avons fait la démolition, la plomberie, l'électricité et les finitions. Le client est très satisfait du résultat..."
-                value={writtenDescription}
-                onChange={(e) => setWrittenDescription(e.target.value)}
-                className="min-h-[200px] text-base"
-              />
-
-              {writtenDescription.trim() && (
+              {(vocalDescription || writtenDescription.trim()) && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 p-4 border-2 border-border rounded-xl">
                     <Checkbox
@@ -943,87 +870,124 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
 
         {/* Aperçu de la publication */}
         <Dialog open={showPreview} onOpenChange={setShowPreview}>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-auto">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Aperçu de votre publication</DialogTitle>
+              <DialogTitle className="text-2xl font-bold">Votre publication est prête 🎉</DialogTitle>
               <p className="text-muted-foreground">
-                Modifiez si besoin avant de publier
+                Vérifiez et ajustez avant de publier
               </p>
             </DialogHeader>
 
-            <div className="grid lg:grid-cols-2 gap-6 py-4">
-              {/* Photos avec sélecteur retouche */}
+            <div className="grid lg:grid-cols-[2fr,3fr] gap-8 py-6">
+              {/* Preview style mobile Instagram */}
               <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-bold text-lg">
-                      {media.length} photo{media.length > 1 ? "s" : ""}
-                    </p>
-                    <Badge variant="outline" className="gap-1">
-                      <Check className="w-3 h-3" />
-                      {media.length}/10
-                    </Badge>
+                <Card className="overflow-hidden border-2">
+                  {/* Header type Instagram */}
+                  <div className="flex items-center gap-3 p-4 border-b">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-bold">
+                      {companyData?.companyName?.charAt(0).toUpperCase() || "E"}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-sm">{companyData?.companyName || "Votre entreprise"}</p>
+                      <p className="text-xs text-muted-foreground">{companyData?.interventionCity || "Votre ville"}</p>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    {media.slice(0, 4).map((item) => (
-                      <div key={item.id} className="aspect-square rounded-lg overflow-hidden border-2 border-border">
-                        <img src={item.url} alt="Photo" className="w-full h-full object-cover" />
+                  {/* Carousel photos */}
+                  <div className="relative aspect-square bg-muted">
+                    {media.length > 0 && (
+                      <img 
+                        src={media[0].url} 
+                        alt="Photo 1" 
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {media.length > 1 && (
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                        {media.map((_, idx) => (
+                          <div 
+                            key={idx} 
+                            className={`w-1.5 h-1.5 rounded-full ${idx === 0 ? "bg-white" : "bg-white/40"}`} 
+                          />
+                        ))}
                       </div>
-                    ))}
+                    )}
+                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs font-medium">
+                      {media.length} photo{media.length > 1 ? "s" : ""}
+                    </div>
                   </div>
-                </div>
 
-                <Card className="p-4">
-                  <p className="font-medium mb-3">Niveau de retouche photo</p>
-                  <div className="space-y-2">
+                  {/* Actions type Instagram */}
+                  <div className="p-4">
+                    <div className="flex gap-4 mb-3">
+                      <button className="hover:opacity-70 transition-opacity">❤️</button>
+                      <button className="hover:opacity-70 transition-opacity">💬</button>
+                      <button className="hover:opacity-70 transition-opacity">📤</button>
+                    </div>
+                    <p className="text-sm">
+                      <span className="font-bold">{companyData?.companyName || "Votre entreprise"}</span>{" "}
+                      <span className="text-muted-foreground line-clamp-2">
+                        {getCurrentCaption().split("\n")[0].substring(0, 100)}...
+                      </span>
+                    </p>
+                  </div>
+                </Card>
+
+                {/* Options retouche */}
+                <Card className="p-5">
+                  <p className="font-bold mb-4 flex items-center gap-2">
+                    <Wand2 className="w-5 h-5 text-primary" />
+                    Niveau de retouche
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => setRetoucheLevel("original")}
-                      className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
+                      className={`p-3 rounded-xl border-2 transition-all text-center ${
                         retoucheLevel === "original"
-                          ? "border-primary bg-primary/5"
+                          ? "border-primary bg-primary/10"
                           : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <p className="font-semibold">📷 Original</p>
-                      <p className="text-xs text-muted-foreground">Photos non retouchées</p>
+                      <p className="text-2xl mb-1">📷</p>
+                      <p className="text-xs font-semibold">Original</p>
                     </button>
                     <button
                       onClick={() => setRetoucheLevel("intense")}
-                      className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
+                      className={`p-3 rounded-xl border-2 transition-all text-center ${
                         retoucheLevel === "intense"
-                          ? "border-primary bg-primary/5"
+                          ? "border-primary bg-primary/10"
                           : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <p className="font-semibold">✨ Intense</p>
-                      <p className="text-xs text-muted-foreground">Retouche modérée (lumière, contraste)</p>
+                      <p className="text-2xl mb-1">✨</p>
+                      <p className="text-xs font-semibold">Intense</p>
                     </button>
                     <button
                       onClick={() => setRetoucheLevel("smart")}
-                      className={`w-full p-3 rounded-lg text-left border-2 transition-all ${
+                      className={`p-3 rounded-xl border-2 transition-all text-center ${
                         retoucheLevel === "smart"
-                          ? "border-primary bg-primary/5"
+                          ? "border-primary bg-primary/10"
                           : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <p className="font-semibold">🤖 Smart IA</p>
-                      <p className="text-xs text-muted-foreground">Retouche pro avancée</p>
+                      <p className="text-2xl mb-1">🤖</p>
+                      <p className="text-xs font-semibold">Smart IA</p>
                     </button>
                   </div>
                 </Card>
               </div>
 
-              {/* Texte avec versions par réseau */}
-              <div className="space-y-4">
-                <div className="flex gap-2 mb-3">
+              {/* Édition du texte */}
+              <div className="space-y-5">
+                {/* Tabs réseaux sociaux */}
+                <div className="flex gap-2 overflow-x-auto pb-2">
                   {socialNetworks.map((network) => (
                     <button
                       key={network.id}
                       onClick={() => setSelectedNetwork(network.id)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                      className={`px-5 py-2.5 rounded-xl font-semibold transition-all whitespace-nowrap ${
                         selectedNetwork === network.id
-                          ? "bg-primary text-white"
+                          ? "bg-primary text-white shadow-lg scale-105"
                           : "bg-muted hover:bg-muted/80"
                       }`}
                     >
@@ -1032,9 +996,14 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
                   ))}
                 </div>
 
-                <Card className="p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-bold">Texte de publication</p>
+                <Card className="p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="font-bold text-lg">Texte de publication</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Modifiez le texte ou régénérez-le avec l'IA
+                      </p>
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
@@ -1053,17 +1022,31 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
                   <Textarea
                     value={getCurrentCaption()}
                     onChange={(e) => updateNetworkCaption(e.target.value)}
-                    className="min-h-[350px] font-mono text-sm"
+                    className="min-h-[400px] text-base leading-relaxed font-sans"
                   />
+
+                  <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
+                    <Info className="w-4 h-4" />
+                    <span>{getCurrentCaption().length} caractères</span>
+                  </div>
                 </Card>
 
+                {/* Actions */}
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1">
-                    Aperçu
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className="flex-1"
+                    onClick={() => setShowPreview(false)}
+                  >
+                    Modifier
                   </Button>
-                  <Button className="flex-1">
-                    Publier
-                    <Sparkles className="w-4 h-4 ml-2" />
+                  <Button 
+                    size="lg"
+                    className="flex-1 text-lg font-bold"
+                  >
+                    <Sparkles className="w-5 h-5 mr-2" />
+                    Publier maintenant
                   </Button>
                 </div>
               </div>
