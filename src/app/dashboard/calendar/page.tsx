@@ -14,7 +14,7 @@ import {
   Plus,
   Calendar as CalendarIcon,
   Clock,
-  Eye,
+  Eye as EyeIcon,
   Edit,
 } from "lucide-react";
 
@@ -178,7 +178,7 @@ export default function CalendarPage() {
 
                       <div className="flex gap-2">
                         <Button variant="ghost" size="sm" className="flex-1 h-8">
-                          <Eye className="w-3 h-3 mr-1" />
+                          <EyeIcon className="w-3 h-3 mr-1" />
                           Voir
                         </Button>
                         <Button variant="ghost" size="sm" className="flex-1 h-8">
