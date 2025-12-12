@@ -8,64 +8,83 @@ import { getOnboardingData, type OnboardingData } from "@/lib/onboarding-storage
 import DashboardLayout from "@/components/dashboard-layout";
 import {
   Eye,
-  Sparkles,
+  Heart,
+  MessageCircle,
   Calendar,
-  CheckCircle2,
-  Clock,
-  ImagePlus,
+  Instagram,
   RefreshCw,
-  Filter,
+  MoreHorizontal,
 } from "lucide-react";
 
-const mockSuggestedPosts = [
+const mockPublishedPosts = [
   {
     id: 1,
     title: "Conseil : Comment choisir le bon revêtement de sol ?",
     type: "Conseil",
-    status: "ready",
-    preview: "💡 Parquet, carrelage ou vinyle ? On vous aide à faire le bon choix selon vos besoins et votre budget.",
+    publishedAt: "2024-01-18",
+    platform: "Instagram",
     image: null,
-    scheduledFor: null,
+    stats: {
+      views: 482,
+      likes: 34,
+      comments: 8,
+    },
   },
   {
     id: 2,
     title: "Tutoriel : Installer un robinet thermostatique",
     type: "Tutoriel",
-    status: "ready",
-    preview: "🔧 Apprenez à installer un robinet thermostatique en 5 étapes simples. Économies d'énergie garanties !",
+    publishedAt: "2024-01-15",
+    platform: "Instagram",
     image: null,
-    scheduledFor: null,
+    stats: {
+      views: 721,
+      likes: 56,
+      comments: 12,
+    },
   },
   {
     id: 3,
     title: "Actualité : Nouvelles normes d'isolation 2024",
     type: "Actualité",
-    status: "ready",
-    preview: "📰 Les nouvelles normes d'isolation thermique entrent en vigueur ce mois-ci. Ce qui change pour vos projets.",
+    publishedAt: "2024-01-12",
+    platform: "Instagram",
     image: null,
-    scheduledFor: null,
+    stats: {
+      views: 638,
+      likes: 45,
+      comments: 15,
+    },
   },
   {
     id: 4,
     title: "Avis : Client satisfait à Montreuil",
     type: "Avis",
-    status: "ready",
-    preview: "⭐ Découvrez le témoignage de M. Dupont sur notre rénovation complète de sa salle de bain. 5 étoiles !",
+    publishedAt: "2024-01-10",
+    platform: "Instagram",
     image: null,
-    scheduledFor: null,
+    stats: {
+      views: 892,
+      likes: 78,
+      comments: 23,
+    },
   },
   {
     id: 5,
     title: "Conseil : Optimiser l'isolation de votre maison",
     type: "Conseil",
-    status: "draft",
-    preview: "🏡 Les meilleures techniques pour améliorer votre isolation et réduire vos factures d'énergie.",
+    publishedAt: "2024-01-08",
+    platform: "Instagram",
     image: null,
-    scheduledFor: "2024-01-25",
+    stats: {
+      views: 543,
+      likes: 41,
+      comments: 9,
+    },
   },
 ];
 
-function SuggestedPostCard({ post, onRegenerate }: { post: typeof mockSuggestedPosts[0]; onRegenerate: () => void }) {
+function PublishedPostCard({ post }: { post: typeof mockPublishedPosts[0] }) {
   const typeColors = {
     "Avis": "#fbbf24",
     "Conseil": "#3b82f6",
@@ -74,76 +93,60 @@ function SuggestedPostCard({ post, onRegenerate }: { post: typeof mockSuggestedP
   };
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300">
-      <CardContent className="p-5">
+    <Card className="hover:shadow-lg transition-all duration-300">
+      <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <Badge style={{ backgroundColor: typeColors[post.type as keyof typeof typeColors] + "20", color: typeColors[post.type as keyof typeof typeColors] }}>
+          <Badge style={{ backgroundColor: typeColors[post.type as keyof typeof typeColors] + "20", color: typeColors[post.type as keyof typeof typeColors] }} className="text-xs">
             {post.type}
           </Badge>
-          <Badge variant={post.status === "ready" ? "default" : "secondary"}>
-            {post.status === "ready" ? (
-              <>
-                <CheckCircle2 className="w-3 h-3 mr-1" /> Prêt
-              </>
-            ) : (
-              <>
-                <Clock className="w-3 h-3 mr-1" /> Brouillon
-              </>
-            )}
-          </Badge>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Calendar className="w-3 h-3" />
+            {new Date(post.publishedAt).toLocaleDateString("fr-FR")}
+          </div>
         </div>
 
-        {post.image && (
-          <div className="w-full h-40 bg-muted rounded-lg mb-4 flex items-center justify-center">
-            <ImagePlus className="w-8 h-8 text-muted-foreground" />
-          </div>
-        )}
+        <h3 className="font-semibold text-sm mb-3 line-clamp-2">{post.title}</h3>
 
-        <h3 className="font-semibold text-sm mb-2 line-clamp-2">{post.title}</h3>
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{post.preview}</p>
+        <div className="grid grid-cols-3 gap-2 mb-4 p-2 bg-muted/50 rounded-lg">
+          <div className="flex items-center gap-1.5">
+            <Eye className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium">{post.stats.views}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Heart className="w-3.5 h-3.5 text-red-500" />
+            <span className="text-xs font-medium">{post.stats.likes}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <MessageCircle className="w-3.5 h-3.5 text-blue-500" />
+            <span className="text-xs font-medium">{post.stats.comments}</span>
+          </div>
+        </div>
 
         <div className="flex items-center gap-2">
-          <Button size="sm" className="flex-1 h-9">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Personnaliser
+          <Button size="sm" className="flex-1 h-8 text-xs">
+            <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+            Régénérer
           </Button>
-          <Button size="sm" variant="outline" className="h-9 px-3">
-            <Eye className="w-4 h-4" />
+          <Button size="sm" variant="outline" className="flex-1 h-8 text-xs">
+            <Instagram className="w-3.5 h-3.5 mr-1.5" />
+            Story
           </Button>
-          <Button size="sm" variant="outline" className="h-9 px-3" onClick={onRegenerate}>
-            <RefreshCw className="w-4 h-4" />
+          <Button size="sm" variant="outline" className="h-8 px-2">
+            <MoreHorizontal className="w-4 h-4" />
           </Button>
         </div>
-
-        {post.scheduledFor && (
-          <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
-            <Calendar className="w-3 h-3" />
-            Programmé le {new Date(post.scheduledFor).toLocaleDateString("fr-FR")}
-          </div>
-        )}
       </CardContent>
     </Card>
   );
 }
 
-export default function PublicationsPage() {
+export default function HistoriquePage() {
   const [companyData, setCompanyData] = useState<OnboardingData | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string>("Tous");
 
   useEffect(() => {
     const data = getOnboardingData();
     setCompanyData(data);
   }, []);
-
-  const categories = ["Tous", "Conseil", "Tutoriel", "Actualité", "Avis"];
-
-  const filteredPosts = selectedCategory === "Tous" 
-    ? mockSuggestedPosts 
-    : mockSuggestedPosts.filter(post => post.type === selectedCategory);
-
-  const handleRegenerate = (postId: number) => {
-    console.log("Régénérer publication", postId);
-  };
 
   return (
     <DashboardLayout>
@@ -151,32 +154,14 @@ export default function PublicationsPage() {
         <section>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
             <div>
-              <h2 className="text-lg font-bold">Publications Prêtes</h2>
-              <p className="text-sm text-muted-foreground">Personnalisez et publiez en un clic</p>
+              <h2 className="text-lg font-bold">Historique des publications</h2>
+              <p className="text-sm text-muted-foreground">Publications déjà publiées sur vos réseaux</p>
             </div>
-            <Button variant="outline" size="sm">
-              <Sparkles className="w-4 h-4 mr-2" />
-              Générer plus
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
-            <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            {categories.map((category) => (
-              <Badge
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                className="cursor-pointer whitespace-nowrap"
-                onClick={() => setSelectedCategory(category)}
-              >
-                {category}
-              </Badge>
-            ))}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPosts.map((post) => (
-              <SuggestedPostCard key={post.id} post={post} onRegenerate={() => handleRegenerate(post.id)} />
+            {mockPublishedPosts.map((post) => (
+              <PublishedPostCard key={post.id} post={post} />
             ))}
           </div>
         </section>
