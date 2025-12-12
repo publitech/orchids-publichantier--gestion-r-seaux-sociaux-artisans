@@ -33,7 +33,8 @@ import {
   Upload,
   Wand2,
   Target,
-  X
+  X,
+  Hourglass
 } from "lucide-react";
 
 const TOTAL_STEPS = 11;
