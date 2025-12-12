@@ -991,7 +991,7 @@ function Step9LogoColors({
         </Button>
       </div>
 
-      <Dialog open={showLogoModal} onOpenChange={setShowLogoModal}>
+      <Dialog open={showLogoModal} onOpenChange={(open) => setShowLogoModal(open)}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">Choisissez votre logo</DialogTitle>
