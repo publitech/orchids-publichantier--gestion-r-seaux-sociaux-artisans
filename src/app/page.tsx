@@ -297,38 +297,6 @@ function Step3MagicOnboarding({
   const [websiteScreenshot, setWebsiteScreenshot] = useState<string | null>(null);
   const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
 
-  const handleContinue = () => {
-    if (data.websiteUrl) {
-      setIsLoadingScreenshot(true);
-      setShowVerificationModal(true);
-      
-      setTimeout(() => {
-        setWebsiteScreenshot(`https://api.screenshotmachine.com/?key=demo&url=${encodeURIComponent(data.websiteUrl)}&dimension=1024x768`);
-        setIsLoadingScreenshot(false);
-      }, 1500);
-    } else {
-      onNext();
-    }
-  };
-
-  const handleConfirmWebsite = () => {
-    setShowVerificationModal(false);
-    setIsAnalyzing(true);
-    
-    setTimeout(() => {
-      setData({
-        ...data,
-        address: "15 Rue des Artisans, 75011 Paris",
-        contactEmail: "contact@" + data.companyName.toLowerCase().replace(/\s/g, "") + ".fr",
-        phone: "01 23 45 67 89",
-        description: "Entreprise spécialisée dans la rénovation intérieure et extérieure. Plus de 10 ans d'expérience dans le bâtiment.",
-      });
-      setIsAnalyzing(false);
-      setAnalyzed(true);
-      onNext();
-    }, 2500);
-  };
-
   const handleRejectWebsite = () => {
     setShowVerificationModal(false);
     setWebsiteScreenshot(null);
@@ -365,14 +333,6 @@ function Step3MagicOnboarding({
           }}
           className="h-14 text-lg"
         />
-
-        <Button 
-          onClick={handleContinue}
-          className="w-full h-14 text-base font-semibold"
-        >
-          {data.websiteUrl ? "Vérifier mon site" : "Je n'ai pas de site internet"}
-          <ChevronRight className="w-5 h-5 ml-2" />
-        </Button>
 
         {isAnalyzing && (
           <motion.div
@@ -438,7 +398,23 @@ function Step3MagicOnboarding({
               </Button>
               <Button
                 className="flex-1 h-14 text-base font-semibold"
-                onClick={handleConfirmWebsite}
+                onClick={() => {
+                  setShowVerificationModal(false);
+                  setIsAnalyzing(true);
+                  
+                  setTimeout(() => {
+                    setData({
+                      ...data,
+                      address: "15 Rue des Artisans, 75011 Paris",
+                      contactEmail: "contact@" + data.companyName.toLowerCase().replace(/\s/g, "") + ".fr",
+                      phone: "01 23 45 67 89",
+                      description: "Entreprise spécialisée dans la rénovation intérieure et extérieure. Plus de 10 ans d'expérience dans le bâtiment.",
+                    });
+                    setIsAnalyzing(false);
+                    setAnalyzed(true);
+                    onNext();
+                  }, 2500);
+                }}
               >
                 <Check className="w-5 h-5 mr-2" />
                 Oui, c'est bien mon site !
