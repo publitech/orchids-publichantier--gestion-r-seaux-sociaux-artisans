@@ -299,7 +299,7 @@ function Step3MagicOnboarding({
   const [websiteScreenshot, setWebsiteScreenshot] = useState<string | null>(null);
   const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const handleContinueEvent = () => {
       if (data.websiteUrl) {
         setIsLoadingScreenshot(true);
