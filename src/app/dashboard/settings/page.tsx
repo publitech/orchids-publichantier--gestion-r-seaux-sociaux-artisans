@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { getOnboardingData, saveOnboardingData, type OnboardingData } from "@/lib/onboarding-storage";
 import DashboardLayout from "@/components/dashboard-layout";
 import {
@@ -22,6 +23,7 @@ import {
   Building2,
   Globe,
   Target,
+  Wand2,
 } from "lucide-react";
 
 export default function SettingsPage() {
