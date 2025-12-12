@@ -36,7 +36,7 @@ import {
   X
 } from "lucide-react";
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 11;
 
 interface OnboardingData {
   authMethod: "google" | "email" | null;
@@ -1084,13 +1084,10 @@ function Step10PersonalInfo({
   );
 }
 
-function StepFinal({ data }: { data: OnboardingData }) {
-  const [showConfetti, setShowConfetti] = useState(false);
+function Step11Final({ data }: { data: OnboardingData }) {
   const router = useRouter();
 
   useEffect(() => {
-    setShowConfetti(true);
-    
     const saveData = async () => {
       let logoBase64: string | null = null;
       
@@ -1117,45 +1114,84 @@ function StepFinal({ data }: { data: OnboardingData }) {
   };
 
   return (
-    <StepWrapper 
-      title={`Bravo ${data.ownerFirstName} ! 🎉`}
-      subtitle={`${data.companyName} est prêt à briller sur les réseaux sociaux`}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.4 }}
+      className="w-full max-w-lg mx-auto text-center"
     >
       <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.3, type: "spring" }}
-        className="space-y-6"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+        className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6"
       >
-        <div className="space-y-3">
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-green-50 border-2 border-green-200">
-            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-              <Check className="w-6 h-6 text-white" />
-            </div>
-            <p className="font-semibold text-green-900">IA Configurée pour votre entreprise</p>
-          </div>
+        <Check className="w-12 h-12 text-white" strokeWidth={3} />
+      </motion.div>
 
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-green-50 border-2 border-green-200">
-            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
-              <Check className="w-6 h-6 text-white" />
-            </div>
-            <p className="font-semibold text-green-900">Génération Illimitée Activée</p>
-          </div>
+      <h1 className="text-3xl font-bold text-foreground mb-2">
+        Bravo {data.ownerFirstName} ! 🎉
+      </h1>
+      <p className="text-lg text-muted-foreground mb-8">
+        <span className="text-primary font-semibold">{data.companyName}</span> est prêt à briller sur les réseaux sociaux
+      </p>
 
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-red-50 border-2 border-red-200">
-            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-              <X className="w-6 h-6 text-white" />
-            </div>
-            <p className="font-semibold text-red-900">14 jours d'essai gratuit actif</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="space-y-3 mb-8"
+      >
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white border border-border shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <Sparkles className="w-5 h-5 text-primary" />
+          </div>
+          <p className="text-left font-medium text-foreground">3 publications suggérées prêtes</p>
+          <div className="ml-auto w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+            <Check className="w-4 h-4 text-white" strokeWidth={3} />
           </div>
         </div>
 
-        <Button size="lg" className="w-full h-14 text-lg font-semibold" onClick={handleContinue}>
-          Continuer
-          <ChevronRight className="w-5 h-5 ml-2" />
-        </Button>
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white border border-border shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <Wand2 className="w-5 h-5 text-primary" />
+          </div>
+          <p className="text-left font-medium text-foreground">IA configurée pour votre entreprise</p>
+          <div className="ml-auto w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+            <Check className="w-4 h-4 text-white" strokeWidth={3} />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-white border border-border shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <span className="text-lg">🏆</span>
+          </div>
+          <p className="text-left font-medium text-foreground">14 jours d'essai gratuit actifs</p>
+          <div className="ml-auto w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+            <Check className="w-4 h-4 text-white" strokeWidth={3} />
+          </div>
+        </div>
       </motion.div>
-    </StepWrapper>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <Button 
+          size="lg" 
+          className="w-full h-14 text-lg font-semibold"
+          onClick={handleContinue}
+        >
+          <Sparkles className="w-5 h-5 mr-2" />
+          Découvrir mon tableau de bord
+        </Button>
+        <p className="text-sm text-muted-foreground mt-4">
+          Créez votre première publication en moins de 2 minutes
+        </p>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -1187,6 +1223,7 @@ export default function OnboardingPage() {
       case 7: return true;
       case 8: return true;
       case 9: return true;
+      case 10: return true;
       default: return true;
     }
   };
@@ -1250,8 +1287,8 @@ export default function OnboardingPage() {
           {currentStep === 9 && (
             <Step10PersonalInfo key="step10" data={data} setData={setData} />
           )}
-          {currentStep === TOTAL_STEPS - 1 && (
-            <StepFinal key="final" data={data} />
+          {currentStep === 10 && (
+            <Step11Final key="final" data={data} />
           )}
         </AnimatePresence>
       </main>
