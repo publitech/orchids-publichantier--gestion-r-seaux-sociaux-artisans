@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getOnboardingData, type OnboardingData } from "@/lib/onboarding-storage";
 import {
   LayoutDashboard,
   FileText,
@@ -27,17 +28,6 @@ import {
   Share2,
   ImagePlus,
 } from "lucide-react";
-
-const mockCompany = {
-  name: "Rénovation Martin",
-  logo: null,
-  primaryColor: "#f4862d",
-  stats: {
-    publications: 12,
-    views: 3456,
-    engagement: 234,
-  },
-};
 
 const mockSuggestedPosts = [
   {
@@ -75,7 +65,7 @@ const mockUpcomingPosts = [
   { id: 3, date: "2024-01-28", title: "Avant/Après salle de bain", time: "09:00" },
 ];
 
-function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function Sidebar({ isOpen, onClose, company }: { isOpen: boolean; onClose: () => void; company: OnboardingData | null }) {
   const [activeTab, setActiveTab] = useState("dashboard");
 
   const menuItems = [
@@ -109,14 +99,22 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           <div className="p-6 border-b border-border">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
-                  style={{ backgroundColor: mockCompany.primaryColor }}
-                >
-                  {mockCompany.name.charAt(0)}
-                </div>
+                {company?.logo ? (
+                  <img 
+                    src={company.logo} 
+                    alt={company.companyName}
+                    className="w-10 h-10 rounded-lg object-cover"
+                  />
+                ) : (
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold"
+                    style={{ backgroundColor: company?.primaryColor || "#f4862d" }}
+                  >
+                    {company?.companyName?.charAt(0) || "P"}
+                  </div>
+                )}
                 <div>
-                  <h2 className="font-bold text-sm">{mockCompany.name}</h2>
+                  <h2 className="font-bold text-sm">{company?.companyName || "Mon entreprise"}</h2>
                   <p className="text-xs text-muted-foreground">Plan Pro</p>
                 </div>
               </div>
@@ -253,10 +251,16 @@ function SuggestedPostCard({ post }: { post: typeof mockSuggestedPosts[0] }) {
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [companyData, setCompanyData] = useState<OnboardingData | null>(null);
+
+  useEffect(() => {
+    const data = getOnboardingData();
+    setCompanyData(data);
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-background">
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} company={companyData} />
 
       <main className="flex-1">
         {/* Top bar */}
@@ -268,7 +272,7 @@ export default function DashboardPage() {
               </button>
               <div>
                 <h1 className="text-2xl font-bold">Tableau de bord</h1>
-                <p className="text-sm text-muted-foreground">Bienvenue sur PubliChantier 👋</p>
+                <p className="text-sm text-muted-foreground">Bienvenue {companyData?.ownerFirstName ? `${companyData.ownerFirstName} ` : ""}sur PubliChantier 👋</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -291,21 +295,21 @@ export default function DashboardPage() {
               <StatCard
                 icon={FileText}
                 label="Publications ce mois"
-                value={mockCompany.stats.publications}
+                value={12}
                 trend="+23%"
-                color="#f4862d"
+                color={companyData?.primaryColor || "#f4862d"}
               />
               <StatCard
                 icon={Eye}
                 label="Vues totales"
-                value={mockCompany.stats.views.toLocaleString()}
+                value="3,456"
                 trend="+45%"
                 color="#3b82f6"
               />
               <StatCard
                 icon={Users}
                 label="Engagements"
-                value={mockCompany.stats.engagement}
+                value={234}
                 trend="+12%"
                 color="#10b981"
               />
