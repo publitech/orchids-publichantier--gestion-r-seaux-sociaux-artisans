@@ -19,6 +19,8 @@ import {
   ImagePlus,
   Settings,
   Plus,
+  RefreshCw,
+  Filter,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -49,6 +51,24 @@ const mockSuggestedPosts = [
     preview: "🚧 Découvrez l'avancement de notre projet d'extension. 40m² supplémentaires pour une famille qui s'agrandit !",
     image: null,
     scheduledFor: "2024-01-25",
+  },
+  {
+    id: 4,
+    title: "Tutoriel : Installer un robinet thermostatique",
+    type: "Tutoriel",
+    status: "ready",
+    preview: "🔧 Apprenez à installer un robinet thermostatique en 5 étapes simples. Économies d'énergie garanties !",
+    image: null,
+    scheduledFor: null,
+  },
+  {
+    id: 5,
+    title: "Actualité : Nouvelles normes d'isolation 2024",
+    type: "Actualité",
+    status: "ready",
+    preview: "📰 Les nouvelles normes d'isolation thermique entrent en vigueur ce mois-ci. Ce qui change pour vos projets.",
+    image: null,
+    scheduledFor: null,
   },
 ];
 
@@ -92,11 +112,13 @@ function StatCard({
   );
 }
 
-function SuggestedPostCard({ post }: { post: typeof mockSuggestedPosts[0] }) {
+function SuggestedPostCard({ post, onRegenerate }: { post: typeof mockSuggestedPosts[0]; onRegenerate: () => void }) {
   const typeColors = {
     "Avant/Après": "#f4862d",
     "Conseil": "#3b82f6",
     "Chantier": "#10b981",
+    "Tutoriel": "#8b5cf6",
+    "Actualité": "#ef4444",
   };
 
   return (
@@ -136,6 +158,9 @@ function SuggestedPostCard({ post }: { post: typeof mockSuggestedPosts[0] }) {
           <Button size="sm" variant="outline" className="h-9 px-3">
             <Eye className="w-4 h-4" />
           </Button>
+          <Button size="sm" variant="outline" className="h-9 px-3" onClick={onRegenerate}>
+            <RefreshCw className="w-4 h-4" />
+          </Button>
         </div>
 
         {post.scheduledFor && (
@@ -151,12 +176,23 @@ function SuggestedPostCard({ post }: { post: typeof mockSuggestedPosts[0] }) {
 
 export default function DashboardPage() {
   const [companyData, setCompanyData] = useState<OnboardingData | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("Tous");
   const router = useRouter();
 
   useEffect(() => {
     const data = getOnboardingData();
     setCompanyData(data);
   }, []);
+
+  const categories = ["Tous", "Avant/Après", "Conseil", "Chantier", "Tutoriel", "Actualité"];
+
+  const filteredPosts = selectedCategory === "Tous" 
+    ? mockSuggestedPosts 
+    : mockSuggestedPosts.filter(post => post.type === selectedCategory);
+
+  const handleRegenerate = (postId: number) => {
+    console.log("Régénérer publication", postId);
+  };
 
   return (
     <DashboardLayout>
@@ -189,9 +225,9 @@ export default function DashboardPage() {
         </section>
 
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
             <div>
-              <h2 className="text-lg font-bold">Publications suggérées</h2>
+              <h2 className="text-lg font-bold">Publications Prêtes</h2>
               <p className="text-sm text-muted-foreground">Personnalisez et publiez en un clic</p>
             </div>
             <Button variant="outline" size="sm">
@@ -199,9 +235,24 @@ export default function DashboardPage() {
               Générer plus
             </Button>
           </div>
+
+          <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
+            <Filter className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+            {categories.map((category) => (
+              <Badge
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                className="cursor-pointer whitespace-nowrap"
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </Badge>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {mockSuggestedPosts.map((post) => (
-              <SuggestedPostCard key={post.id} post={post} />
+            {filteredPosts.map((post) => (
+              <SuggestedPostCard key={post.id} post={post} onRegenerate={() => handleRegenerate(post.id)} />
             ))}
           </div>
         </section>
