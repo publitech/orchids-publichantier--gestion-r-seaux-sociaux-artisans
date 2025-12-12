@@ -253,6 +253,7 @@ function SuggestedPostCard({ post }: { post: typeof mockSuggestedPosts[0] }) {
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [companyData, setCompanyData] = useState<OnboardingData | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const data = getOnboardingData();
