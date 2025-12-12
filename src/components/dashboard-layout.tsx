@@ -356,7 +356,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         company={companyData} 
       />
 
-      <main className="flex-1 lg:ml-0 pb-20 lg:pb-0">
+      <main className="flex-1 lg:ml-80 pb-20 lg:pb-0">
         <TopBar 
           onMenuClick={() => setSidebarOpen(true)} 
           company={companyData}
