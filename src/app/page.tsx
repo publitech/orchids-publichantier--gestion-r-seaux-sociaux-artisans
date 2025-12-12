@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -285,17 +285,37 @@ function Step2CompanyName({
 function Step3MagicOnboarding({ 
   data, 
   setData,
-  onNext
+  onNext,
+  onContinue
 }: { 
   data: OnboardingData; 
   setData: (d: OnboardingData) => void;
   onNext: () => void;
+  onContinue: () => void;
 }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [websiteScreenshot, setWebsiteScreenshot] = useState<string | null>(null);
   const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
+
+  React.useEffect(() => {
+    const handleContinueEvent = () => {
+      if (data.websiteUrl) {
+        setIsLoadingScreenshot(true);
+        setShowVerificationModal(true);
+        
+        setTimeout(() => {
+          setWebsiteScreenshot(`https://api.screenshotmachine.com/?key=demo&url=${encodeURIComponent(data.websiteUrl)}&dimension=1024x768`);
+          setIsLoadingScreenshot(false);
+        }, 1500);
+      } else {
+        onNext();
+      }
+    };
+    
+    onContinue.current = handleContinueEvent;
+  }, [data.websiteUrl, onNext]);
 
   const handleRejectWebsite = () => {
     setShowVerificationModal(false);
@@ -898,15 +918,24 @@ function StepFinal({ data }: { data: OnboardingData }) {
 export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [data, setData] = useState<OnboardingData>(initialData);
+  const step3ContinueRef = React.useRef<(() => void) | null>(null);
 
   const nextStep = () => setCurrentStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 0));
+
+  const handleContinueClick = () => {
+    if (currentStep === 2 && step3ContinueRef.current) {
+      step3ContinueRef.current();
+    } else {
+      nextStep();
+    }
+  };
 
   const canProceed = () => {
     switch (currentStep) {
       case 0: return data.authMethod !== null;
       case 1: return data.companyName.trim().length > 0;
-      case 2: return false;
+      case 2: return true;
       case 3: return true;
       case 4: return true;
       case 5: return true;
@@ -952,7 +981,7 @@ export default function OnboardingPage() {
             <Step2CompanyName key="step2" data={data} setData={setData} />
           )}
           {currentStep === 2 && (
-            <Step3MagicOnboarding key="step3" data={data} setData={setData} onNext={nextStep} />
+            <Step3MagicOnboarding key="step3" data={data} setData={setData} onNext={nextStep} onContinue={step3ContinueRef} />
           )}
           {currentStep === 3 && (
             <Step4CompanyInfo key="step4" data={data} setData={setData} />
@@ -983,7 +1012,7 @@ export default function OnboardingPage() {
         >
           <div className="max-w-lg mx-auto px-6 py-4">
             <Button 
-              onClick={nextStep}
+              onClick={handleContinueClick}
               disabled={!canProceed()}
               className="w-full h-14 text-base font-semibold"
             >
