@@ -14,6 +14,8 @@ import {
   Plus,
   Calendar as CalendarIcon,
   Clock,
+  Eye,
+  Edit,
 } from "lucide-react";
 
 const mockScheduledPosts = [
