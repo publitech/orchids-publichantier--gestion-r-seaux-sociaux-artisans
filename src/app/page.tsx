@@ -284,10 +284,12 @@ function Step2CompanyName({
 
 function Step3MagicOnboarding({ 
   data, 
-  setData 
+  setData,
+  onNext
 }: { 
   data: OnboardingData; 
   setData: (d: OnboardingData) => void;
+  onNext: () => void;
 }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analyzed, setAnalyzed] = useState(false);
@@ -295,16 +297,18 @@ function Step3MagicOnboarding({
   const [websiteScreenshot, setWebsiteScreenshot] = useState<string | null>(null);
   const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
 
-  const handleVerifyWebsite = () => {
-    if (!data.websiteUrl) return;
-    
-    setIsLoadingScreenshot(true);
-    setShowVerificationModal(true);
-    
-    setTimeout(() => {
-      setWebsiteScreenshot(`https://api.screenshotmachine.com/?key=demo&url=${encodeURIComponent(data.websiteUrl)}&dimension=1024x768`);
-      setIsLoadingScreenshot(false);
-    }, 1500);
+  const handleContinue = () => {
+    if (data.websiteUrl) {
+      setIsLoadingScreenshot(true);
+      setShowVerificationModal(true);
+      
+      setTimeout(() => {
+        setWebsiteScreenshot(`https://api.screenshotmachine.com/?key=demo&url=${encodeURIComponent(data.websiteUrl)}&dimension=1024x768`);
+        setIsLoadingScreenshot(false);
+      }, 1500);
+    } else {
+      onNext();
+    }
   };
 
   const handleConfirmWebsite = () => {
@@ -321,6 +325,7 @@ function Step3MagicOnboarding({
       });
       setIsAnalyzing(false);
       setAnalyzed(true);
+      onNext();
     }, 2500);
   };
 
@@ -350,44 +355,24 @@ function Step3MagicOnboarding({
           </div>
         </div>
 
-        <div className="relative">
-          <Input
-            type="url"
-            placeholder="https://votre-site.fr"
-            value={data.websiteUrl}
-            onChange={(e) => {
-              setData({ ...data, websiteUrl: e.target.value });
-              setAnalyzed(false);
-            }}
-            className="h-14 text-lg pr-32"
-          />
-          {data.websiteUrl && !analyzed && (
-            <Button
-              size="sm"
-              className="absolute right-2 top-1/2 -translate-y-1/2"
-              onClick={handleVerifyWebsite}
-            >
-              <Wand2 className="w-4 h-4 mr-2" />
-              Vérifier
-            </Button>
-          )}
-        </div>
+        <Input
+          type="url"
+          placeholder="https://votre-site.fr"
+          value={data.websiteUrl}
+          onChange={(e) => {
+            setData({ ...data, websiteUrl: e.target.value });
+            setAnalyzed(false);
+          }}
+          className="h-14 text-lg"
+        />
 
-        {analyzed && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-4 bg-green-50 border border-green-200 rounded-xl"
-          >
-            <div className="flex items-center gap-2 text-green-700 font-medium mb-2">
-              <Check className="w-5 h-5" />
-              Informations récupérées avec succès !
-            </div>
-            <p className="text-sm text-green-600">
-              Nous avons pré-rempli vos informations. Vous pourrez les vérifier à l'étape suivante.
-            </p>
-          </motion.div>
-        )}
+        <Button 
+          onClick={handleContinue}
+          className="w-full h-14 text-base font-semibold"
+        >
+          {data.websiteUrl ? "Vérifier mon site" : "Je n'ai pas de site internet"}
+          <ChevronRight className="w-5 h-5 ml-2" />
+        </Button>
 
         {isAnalyzing && (
           <motion.div
@@ -991,7 +976,7 @@ export default function OnboardingPage() {
             <Step2CompanyName key="step2" data={data} setData={setData} />
           )}
           {currentStep === 2 && (
-            <Step3MagicOnboarding key="step3" data={data} setData={setData} />
+            <Step3MagicOnboarding key="step3" data={data} setData={setData} onNext={nextStep} />
           )}
           {currentStep === 3 && (
             <Step4CompanyInfo key="step4" data={data} setData={setData} />
