@@ -979,7 +979,6 @@ function StepFinal({ data }: { data: OnboardingData }) {
   useEffect(() => {
     setShowConfetti(true);
     
-    // Convert logo File to base64 and save data
     const saveData = async () => {
       let logoBase64: string | null = null;
       
@@ -994,7 +993,7 @@ function StepFinal({ data }: { data: OnboardingData }) {
       saveOnboardingData({
         ...data,
         logo: logoBase64,
-        password: "", // Don't store password
+        password: "",
       });
     };
     
@@ -1002,13 +1001,13 @@ function StepFinal({ data }: { data: OnboardingData }) {
   }, [data]);
 
   const handleContinue = () => {
-    router.push("/dashboard");
+    router.push("/dashboard/create");
   };
 
   return (
     <StepWrapper 
-      title="Tout est prêt ! 🎉" 
-      subtitle="Votre compte PubliChantier est configuré"
+      title={`Bravo ${data.ownerFirstName} ! 🎉`}
+      subtitle={`${data.companyName} est prêt à briller sur les réseaux sociaux`}
     >
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
@@ -1016,46 +1015,33 @@ function StepFinal({ data }: { data: OnboardingData }) {
         transition={{ delay: 0.3, type: "spring" }}
         className="space-y-6"
       >
-        <div className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl border border-primary/20">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-xl flex items-center justify-center text-3xl" style={{ backgroundColor: data.primaryColor }}>
-              {data.companyName.charAt(0).toUpperCase()}
+        <div className="space-y-3">
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-green-50 border-2 border-green-200">
+            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+              <Check className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <h3 className="font-bold text-lg">{data.companyName || "Votre entreprise"}</h3>
-              <p className="text-sm text-muted-foreground">{data.address || "Adresse non renseignée"}</p>
-            </div>
+            <p className="font-semibold text-green-900">IA Configurée pour votre entreprise</p>
           </div>
-          
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Mail className="w-4 h-4" />
-              <span className="truncate">{data.contactEmail || "—"}</span>
+
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-green-50 border-2 border-green-200">
+            <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+              <Check className="w-6 h-6 text-white" />
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Phone className="w-4 h-4" />
-              <span>{data.phone || "—"}</span>
+            <p className="font-semibold text-green-900">Génération Illimitée Activée</p>
+          </div>
+
+          <div className="flex items-center gap-4 p-4 rounded-xl bg-red-50 border-2 border-red-200">
+            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+              <X className="w-6 h-6 text-white" />
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Target className="w-4 h-4" />
-              <span>{data.interventionRadius} km autour de {data.interventionCity || "—"}</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MessageSquare className="w-4 h-4" />
-              <span className="capitalize">{data.tone}</span>
-            </div>
+            <p className="font-semibold text-red-900">14 jours d'essai gratuit actif</p>
           </div>
         </div>
 
-        <div className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            Des publications suggérées vous attendent déjà dans votre tableau de bord !
-          </p>
-          <Button size="lg" className="w-full h-14 text-lg font-semibold" onClick={handleContinue}>
-            <Sparkles className="w-5 h-5 mr-2" />
-            Découvrir mon espace
-          </Button>
-        </div>
+        <Button size="lg" className="w-full h-14 text-lg font-semibold" onClick={handleContinue}>
+          Continuer
+          <ChevronRight className="w-5 h-5 ml-2" />
+        </Button>
       </motion.div>
     </StepWrapper>
   );
