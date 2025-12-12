@@ -116,7 +116,7 @@ function Sidebar({
           <div className="p-6 border-b border-border">
             <div className="flex items-center justify-between mb-6">
               <Image 
-                src="/logo-light.svg" 
+                src="/logo.jpg" 
                 alt="PubliChantier" 
                 width={140} 
                 height={32} 
