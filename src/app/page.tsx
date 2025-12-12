@@ -499,12 +499,12 @@ function Step4CompanyInfo({
           />
         </div>
         <div>
-          <Label className="text-sm font-medium">Description de votre activité</Label>
-          <Textarea
-            placeholder="Décrivez en quelques lignes votre activité..."
+          <Label className="text-sm font-medium">Votre métier</Label>
+          <Input
+            placeholder="Ex: Plombier, Électricien, Maçon..."
             value={data.description}
             onChange={(e) => setData({ ...data, description: e.target.value })}
-            className="mt-1 min-h-[100px]"
+            className="h-10 mt-1"
           />
         </div>
       </div>
