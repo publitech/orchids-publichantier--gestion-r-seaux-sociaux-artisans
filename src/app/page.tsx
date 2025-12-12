@@ -339,7 +339,7 @@ function Step3MagicOnboarding({
             <div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Si vous ajoutez l'URL de votre site internet, nous analyserons automatiquement 
-                vos informations (adresse, contact, description...) pour gagner du temps !
+                vos informations (adresse, contact, description, couleurs...) pour gagner du temps !
               </p>
             </div>
           </div>
@@ -425,12 +425,17 @@ function Step3MagicOnboarding({
                   setIsAnalyzing(true);
                   
                   setTimeout(() => {
+                    const extractedPrimaryColor = "#3b82f6";
+                    const extractedSecondaryColor = "#1e40af";
+                    
                     setData({
                       ...data,
                       address: "15 Rue des Artisans, 75011 Paris",
                       contactEmail: "contact@" + data.companyName.toLowerCase().replace(/\s/g, "") + ".fr",
                       phone: "01 23 45 67 89",
                       description: "Entreprise spécialisée dans la rénovation intérieure et extérieure. Plus de 10 ans d'expérience dans le bâtiment.",
+                      primaryColor: extractedPrimaryColor,
+                      secondaryColor: extractedSecondaryColor,
                     });
                     setIsAnalyzing(false);
                     setAnalyzed(true);
@@ -575,12 +580,80 @@ function Step6LogoColors({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLogos, setGeneratedLogos] = useState<string[]>([]);
 
+  const generateRandomColor = () => {
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = Math.floor(Math.random() * 30) + 50;
+    const lightness = Math.floor(Math.random() * 20) + 40;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  };
+
+  const hslToHex = (hsl: string): string => {
+    const match = hsl.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+    if (!match) return hsl;
+    
+    const h = parseInt(match[1]) / 360;
+    const s = parseInt(match[2]) / 100;
+    const l = parseInt(match[3]) / 100;
+    
+    let r, g, b;
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p: number, q: number, t: number) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+    
+    const toHex = (x: number) => {
+      const hex = Math.round(x * 255).toString(16);
+      return hex.length === 1 ? '0' + hex : hex;
+    };
+    
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  };
+
+  const handleSuggestColors = () => {
+    const color1 = generateRandomColor();
+    const color2 = generateRandomColor();
+    setData({ 
+      ...data, 
+      primaryColor: hslToHex(color1), 
+      secondaryColor: hslToHex(color2) 
+    });
+  };
+
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setData({ ...data, logo: file });
       setLogoPreview(URL.createObjectURL(file));
     }
+  };
+
+  const extractColorsFromLogo = (logoUrl: string): { primary: string; secondary: string } => {
+    const colorPairs = [
+      { primary: "#e74c3c", secondary: "#c0392b" },
+      { primary: "#3498db", secondary: "#2980b9" },
+      { primary: "#2ecc71", secondary: "#27ae60" },
+      { primary: "#f39c12", secondary: "#d68910" },
+      { primary: "#9b59b6", secondary: "#8e44ad" },
+      { primary: "#1abc9c", secondary: "#16a085" },
+      { primary: "#34495e", secondary: "#2c3e50" },
+      { primary: "#e67e22", secondary: "#d35400" },
+    ];
+    
+    const index = Math.floor(Math.random() * colorPairs.length);
+    return colorPairs[index];
   };
 
   const handleGenerateLogos = () => {
@@ -610,7 +683,14 @@ function Step6LogoColors({
     const response = await fetch(logoUrl);
     const blob = await response.blob();
     const file = new File([blob], "generated-logo.svg", { type: "image/svg+xml" });
-    setData({ ...data, logo: file });
+    
+    const extractedColors = extractColorsFromLogo(logoUrl);
+    setData({ 
+      ...data, 
+      logo: file,
+      primaryColor: extractedColors.primary,
+      secondaryColor: extractedColors.secondary
+    });
     
     setShowLogoModal(false);
   };
@@ -689,9 +769,9 @@ function Step6LogoColors({
           </div>
         </div>
 
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full" onClick={handleSuggestColors}>
           <Wand2 className="w-4 h-4 mr-2" />
-          Suggérer des couleurs depuis mon site
+          Suggérer des couleurs pour mes publications
         </Button>
       </div>
 
