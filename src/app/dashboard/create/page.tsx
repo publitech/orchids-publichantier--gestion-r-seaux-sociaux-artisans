@@ -265,8 +265,8 @@ ${addCompanyInfo ? `\n📞 ${contactInfo.phone}\n📧 ${contactInfo.email}\n📍
           </div>
           <Button 
             variant="outline" 
-            onClick={() => router.replace("/dashboard")}
-            className="hidden sm:flex items-center gap-2"
+            onClick={() => router.push("/dashboard")}
+            className="flex items-center gap-2"
           >
             Retour au dashboard
           </Button>
