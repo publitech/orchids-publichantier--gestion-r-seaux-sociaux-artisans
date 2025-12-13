@@ -1153,8 +1153,8 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+    <div className="min-h-screen bg-white">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-border">
         <div className="max-w-3xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between mb-4">
             <Image src="/logo.jpg" alt="PubliChantier" width={160} height={40} className="h-10 w-auto" />
@@ -1208,7 +1208,7 @@ export default function OnboardingPage() {
         <motion.div 
           initial={{ y: 100 }}
           animate={{ y: 0 }}
-          className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-lg border-t border-border"
+          className="fixed bottom-0 left-0 right-0 bg-white border-t border-border"
         >
           <div className="max-w-lg mx-auto px-6 py-4">
             <Button 
