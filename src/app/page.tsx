@@ -614,6 +614,7 @@ function Step6Personalization({
   const [showLogoModal, setShowLogoModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLogos, setGeneratedLogos] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const generateRandomColor = () => {
     const hue = Math.floor(Math.random() * 360);
@@ -745,46 +746,47 @@ function Step6Personalization({
             placeholder="Ex: Entreprise de rénovation, Plomberie, Électricité ..."
             value={data.description}
             onChange={(e) => setData({ ...data, description: e.target.value })}
-            className="h-12"
+            className="h-12 bg-white"
           />
-        </div>
-
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-          <p className="text-sm text-blue-900">
-            <span className="font-semibold">💡 Pas de logo sous la main ?</span> Aucun problème ! Vous pourrez ajouter ou modifier votre logo et vos couleurs plus tard dans les paramètres.
-          </p>
         </div>
 
         <div>
           <Label className="text-sm font-medium mb-3 block">Logo de votre entreprise</Label>
-          <div className="flex items-center gap-4">
-            <label className="cursor-pointer group">
-              <div className={`w-24 h-24 rounded-xl border-2 border-dashed flex items-center justify-center transition-all ${
-                logoPreview ? "border-primary" : "border-border hover:border-primary/50"
-              }`}>
-                {logoPreview ? (
-                  <img src={logoPreview} alt="Logo" className="w-full h-full object-contain rounded-xl" />
-                ) : (
-                  <Upload className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
-                )}
+          
+          {logoPreview && (
+            <div className="mb-4 flex justify-center">
+              <div className="w-32 h-32 rounded-xl border-2 border-primary flex items-center justify-center p-2">
+                <img src={logoPreview} alt="Logo" className="w-full h-full object-contain" />
               </div>
-              <input type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
-            </label>
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground">
-                Formats acceptés : PNG, JPG, SVG
-              </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2"
-                onClick={handleGenerateLogos}
-              >
-                <Wand2 className="w-4 h-4 mr-2" />
-                Générer un logo
-              </Button>
             </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              variant="outline"
+              className="h-14 text-base font-medium"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <Upload className="w-5 h-5 mr-2" />
+              Télécharger un logo
+            </Button>
+            <Button
+              variant="outline"
+              className="h-14 text-base font-medium"
+              onClick={handleGenerateLogos}
+            >
+              <Wand2 className="w-5 h-5 mr-2" />
+              Générer un logo
+            </Button>
           </div>
+          
+          <input 
+            ref={fileInputRef}
+            type="file" 
+            accept="image/*" 
+            className="hidden" 
+            onChange={handleLogoChange} 
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -800,7 +802,7 @@ function Step6Personalization({
               <Input
                 value={data.primaryColor}
                 onChange={(e) => setData({ ...data, primaryColor: e.target.value })}
-                className="h-12 font-mono"
+                className="h-12 font-mono bg-white"
               />
             </div>
           </div>
@@ -816,7 +818,7 @@ function Step6Personalization({
               <Input
                 value={data.secondaryColor}
                 onChange={(e) => setData({ ...data, secondaryColor: e.target.value })}
-                className="h-12 font-mono"
+                className="h-12 font-mono bg-white"
               />
             </div>
           </div>
