@@ -37,7 +37,7 @@ import {
   Hourglass
 } from "lucide-react";
 
-const TOTAL_STEPS = 11;
+const TOTAL_STEPS = 8;
 
 interface OnboardingData {
   authMethod: "google" | "email" | null;
@@ -527,15 +527,6 @@ function Step4CompanyInfo({
             className="h-12 mt-1"
           />
         </div>
-        <div>
-          <Label className="text-sm font-medium">Votre métier</Label>
-          <Input
-            placeholder="Ex: Plombier, Électricien, Maçon..."
-            value={data.description}
-            onChange={(e) => setData({ ...data, description: e.target.value })}
-            className="h-10 mt-1"
-          />
-        </div>
       </div>
     </StepWrapper>
   );
@@ -612,173 +603,7 @@ function Step5InterventionZone({
   );
 }
 
-function Step6Tone({ 
-  data, 
-  setData 
-}: { 
-  data: OnboardingData; 
-  setData: (d: OnboardingData) => void;
-}) {
-  const tones = [
-    { id: "pedagogique" as const, label: "Pédagogique", emoji: "📚", description: "Expliquez et éduquez vos clients" },
-    { id: "direct" as const, label: "Direct", emoji: "💪", description: "Allez droit au but, efficace" },
-    { id: "chaleureux" as const, label: "Chaleureux", emoji: "😊", description: "Créez une relation de confiance" },
-  ];
-
-  return (
-    <StepWrapper 
-      title="Le ton de vos publications" 
-      subtitle="Comment voulez-vous communiquer ?"
-      icon={MessageSquare}
-    >
-      <div className="space-y-3">
-        {tones.map((tone) => (
-          <motion.button
-            key={tone.id}
-            onClick={() => setData({ ...data, tone: tone.id })}
-            className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
-              data.tone === tone.id
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50"
-            }`}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{tone.emoji}</span>
-              <div>
-                <p className="font-semibold">{tone.label}</p>
-                <p className="text-sm text-muted-foreground">{tone.description}</p>
-              </div>
-              {data.tone === tone.id && (
-                <Check className="w-5 h-5 text-primary ml-auto" />
-              )}
-            </div>
-          </motion.button>
-        ))}
-      </div>
-    </StepWrapper>
-  );
-}
-
-function Step7Voice({ 
-  data, 
-  setData 
-}: { 
-  data: OnboardingData; 
-  setData: (d: OnboardingData) => void;
-}) {
-  const voices = [
-    { 
-      id: "je" as const, 
-      label: "Je", 
-      example: "Je viens de terminer la réfection complète de cette toiture. Un travail solide et durable." 
-    },
-    { 
-      id: "on_nous" as const, 
-      label: "On / Nous", 
-      example: "On a refait toute la toiture. Un chantier solide qui tiendra des années." 
-    },
-  ];
-
-  return (
-    <StepWrapper 
-      title="En quel nom parler dans vos publications ?" 
-      subtitle="Choisissez la voix qui représente le mieux votre entreprise"
-      icon={User}
-    >
-      <div className="space-y-3">
-        {voices.map((voice) => (
-          <motion.button
-            key={voice.id}
-            onClick={() => setData({ ...data, publicationVoice: voice.id })}
-            className={`w-full p-5 rounded-xl border-2 text-left transition-all ${
-              data.publicationVoice === voice.id
-                ? "border-primary bg-primary/5"
-                : "border-border hover:border-primary/50"
-            }`}
-            whileTap={{ scale: 0.98 }}
-          >
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <p className="font-bold text-lg">{voice.label}</p>
-                {data.publicationVoice === voice.id && (
-                  <Check className="w-5 h-5 text-primary ml-auto" />
-                )}
-              </div>
-              <div className="pl-3 border-l-4 border-primary/30">
-                <p className="text-sm text-muted-foreground italic">
-                  Exemple : "{voice.example}"
-                </p>
-              </div>
-            </div>
-          </motion.button>
-        ))}
-      </div>
-    </StepWrapper>
-  );
-}
-
-function Step8Emojis({ 
-  data, 
-  setData 
-}: { 
-  data: OnboardingData; 
-  setData: (d: OnboardingData) => void;
-}) {
-  return (
-    <StepWrapper 
-      title="Utilisation des émojis" 
-      subtitle="Rendez vos publications plus vivantes et expressives"
-      icon={Sparkles}
-    >
-      <div className="space-y-3">
-        <motion.button
-          onClick={() => setData({ ...data, useEmojis: true })}
-          className={`w-full p-5 rounded-xl border-2 text-left transition-all ${
-            data.useEmojis
-              ? "border-primary bg-primary/5"
-              : "border-border hover:border-primary/50"
-          }`}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">✨</span>
-            <div className="flex-1">
-              <p className="font-semibold">Oui, j'aime les émojis</p>
-              <p className="text-sm text-muted-foreground">Ajoutez une touche conviviale à vos publications</p>
-            </div>
-            {data.useEmojis && (
-              <Check className="w-5 h-5 text-primary" />
-            )}
-          </div>
-        </motion.button>
-
-        <motion.button
-          onClick={() => setData({ ...data, useEmojis: false })}
-          className={`w-full p-5 rounded-xl border-2 text-left transition-all ${
-            !data.useEmojis
-              ? "border-primary bg-primary/5"
-              : "border-border hover:border-primary/50"
-          }`}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">📝</span>
-            <div className="flex-1">
-              <p className="font-semibold">Non, style sobre</p>
-              <p className="text-sm text-muted-foreground">Gardez un ton professionnel sans émojis</p>
-            </div>
-            {!data.useEmojis && (
-              <Check className="w-5 h-5 text-primary" />
-            )}
-          </div>
-        </motion.button>
-      </div>
-    </StepWrapper>
-  );
-}
-
-function Step9LogoColors({ 
+function Step6Personalization({ 
   data, 
   setData 
 }: { 
@@ -907,11 +732,23 @@ function Step9LogoColors({
 
   return (
     <StepWrapper 
-      title="L'identité visuelle de votre entreprise" 
-      subtitle="Logo et couleurs pour vos publications"
+      title="Personnalisation" 
+      subtitle="Identité visuelle de votre entreprise"
       icon={Palette}
     >
       <div className="space-y-6">
+        <div>
+          <Label className="text-sm font-medium mb-2 block">
+            Votre métier <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            placeholder="Ex: Entreprise de rénovation, Plomberie, Électricité ..."
+            value={data.description}
+            onChange={(e) => setData({ ...data, description: e.target.value })}
+            className="h-12"
+          />
+        </div>
+
         <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
           <p className="text-sm text-blue-900">
             <span className="font-semibold">💡 Pas de logo sous la main ?</span> Aucun problème ! Vous pourrez ajouter ou modifier votre logo et vos couleurs plus tard dans les paramètres.
@@ -1034,7 +871,99 @@ function Step9LogoColors({
   );
 }
 
-function Step10PersonalInfo({ 
+function Step7PublicationPreferences({ 
+  data, 
+  setData 
+}: { 
+  data: OnboardingData; 
+  setData: (d: OnboardingData) => void;
+}) {
+  const tones = [
+    { id: "pedagogique" as const, label: "Pédagogique", emoji: "📚" },
+    { id: "direct" as const, label: "Direct", emoji: "💪" },
+    { id: "chaleureux" as const, label: "Chaleureux", emoji: "😊" },
+  ];
+
+  return (
+    <StepWrapper 
+      title="Préférences de publication" 
+      subtitle="Comment voulez-vous communiquer ?"
+      icon={MessageSquare}
+    >
+      <div className="space-y-6">
+        <div>
+          <Label className="text-sm font-medium mb-3 block">Ton de vos publications</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {tones.map((tone) => (
+              <motion.button
+                key={tone.id}
+                onClick={() => setData({ ...data, tone: tone.id })}
+                className={`p-3 rounded-xl border-2 text-center transition-all ${
+                  data.tone === tone.id
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                }`}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="text-2xl mb-1 block">{tone.emoji}</span>
+                <p className="font-semibold text-sm">{tone.label}</p>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-sm font-medium mb-3 block">En quel nom parler dans vos publications ?</Label>
+          <div className="grid grid-cols-2 gap-3">
+            <motion.button
+              onClick={() => setData({ ...data, publicationVoice: "je" })}
+              className={`p-4 rounded-xl border-2 text-center transition-all ${
+                data.publicationVoice === "je"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
+              }`}
+              whileTap={{ scale: 0.95 }}
+            >
+              <p className="font-bold text-lg">Je</p>
+              {data.publicationVoice === "je" && (
+                <Check className="w-5 h-5 text-primary mx-auto mt-2" />
+              )}
+            </motion.button>
+            <motion.button
+              onClick={() => setData({ ...data, publicationVoice: "on_nous" })}
+              className={`p-4 rounded-xl border-2 text-center transition-all ${
+                data.publicationVoice === "on_nous"
+                  ? "border-primary bg-primary/5"
+                  : "border-border hover:border-primary/50"
+              }`}
+              whileTap={{ scale: 0.95 }}
+            >
+              <p className="font-bold text-lg">On / Nous</p>
+              {data.publicationVoice === "on_nous" && (
+                <Check className="w-5 h-5 text-primary mx-auto mt-2" />
+              )}
+            </motion.button>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-3 p-4 rounded-xl border-2 border-border bg-background hover:border-primary/50 transition-all cursor-pointer"
+          onClick={() => setData({ ...data, useEmojis: !data.useEmojis })}
+        >
+          <Checkbox 
+            id="emojis" 
+            checked={data.useEmojis}
+            onCheckedChange={(checked) => setData({ ...data, useEmojis: checked as boolean })}
+          />
+          <Label htmlFor="emojis" className="text-sm font-medium cursor-pointer flex-1">
+            Utiliser des émojis dans mes publications 😊
+          </Label>
+        </div>
+      </div>
+    </StepWrapper>
+  );
+}
+
+function Step8PersonalInfo({ 
   data, 
   setData 
 }: { 
@@ -1219,12 +1148,9 @@ export default function OnboardingPage() {
       case 2: return true;
       case 3: return true;
       case 4: return true;
-      case 5: return true;
+      case 5: return data.description.trim().length > 0;
       case 6: return true;
       case 7: return true;
-      case 8: return true;
-      case 9: return true;
-      case 10: return true;
       default: return true;
     }
   };
@@ -1274,21 +1200,15 @@ export default function OnboardingPage() {
             <Step5InterventionZone key="step5" data={data} setData={setData} />
           )}
           {currentStep === 5 && (
-            <Step6Tone key="step6" data={data} setData={setData} />
+            <Step6Personalization key="step6" data={data} setData={setData} />
           )}
           {currentStep === 6 && (
-            <Step7Voice key="step7" data={data} setData={setData} />
+            <Step7PublicationPreferences key="step7" data={data} setData={setData} />
           )}
           {currentStep === 7 && (
-            <Step8Emojis key="step8" data={data} setData={setData} />
+            <Step8PersonalInfo key="step8" data={data} setData={setData} />
           )}
-          {currentStep === 8 && (
-            <Step9LogoColors key="step9" data={data} setData={setData} />
-          )}
-          {currentStep === 9 && (
-            <Step10PersonalInfo key="step10" data={data} setData={setData} />
-          )}
-          {currentStep === 10 && (
+          {currentStep === 7 && (
             <Step11Final key="final" data={data} />
           )}
         </AnimatePresence>
