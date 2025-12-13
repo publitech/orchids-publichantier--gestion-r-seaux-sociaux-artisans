@@ -87,31 +87,15 @@ const initialData: OnboardingData = {
 
 function ProgressBar({ currentStep }: { currentStep: number }) {
   return (
-    <div className="w-full max-w-md mx-auto mb-8">
-      <div className="flex justify-between mb-2">
-        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-          <motion.div
-            key={i}
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 ${
-              i < currentStep
-                ? "bg-primary text-white"
-                : i === currentStep
-                ? "bg-primary text-white ring-4 ring-primary/20"
-                : "bg-muted text-muted-foreground"
-            }`}
-            initial={{ scale: 0.8 }}
-            animate={{ scale: i === currentStep ? 1.1 : 1 }}
-            transition={{ duration: 0.2 }}
-          >
-            {i < currentStep ? <Check className="w-4 h-4" /> : i + 1}
-          </motion.div>
-        ))}
-      </div>
-      <div className="h-2 bg-muted rounded-full overflow-hidden">
+    <div className="w-full max-w-md mx-auto mb-2">
+      <p className="text-center text-sm text-muted-foreground mb-2">
+        Étape {currentStep + 1} sur {TOTAL_STEPS - 1}
+      </p>
+      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
         <motion.div
           className="h-full bg-primary"
           initial={{ width: 0 }}
-          animate={{ width: `${((currentStep + 1) / TOTAL_STEPS) * 100}%` }}
+          animate={{ width: `${((currentStep + 1) / (TOTAL_STEPS - 1)) * 100}%` }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         />
       </div>
