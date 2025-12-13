@@ -500,7 +500,7 @@ function Step4CompanyInfo({
             placeholder="15 Rue des Artisans, 75011 Paris"
             value={data.address}
             onChange={(e) => handleAddressChange(e.target.value)}
-            className="h-12 mt-1"
+            className="h-12 mt-1 bg-white"
           />
         </div>
         <div>
@@ -512,7 +512,7 @@ function Step4CompanyInfo({
             placeholder="contact@votre-entreprise.fr"
             value={data.contactEmail}
             onChange={(e) => setData({ ...data, contactEmail: e.target.value })}
-            className="h-12 mt-1"
+            className="h-12 mt-1 bg-white"
           />
         </div>
         <div>
@@ -524,7 +524,7 @@ function Step4CompanyInfo({
             placeholder="01 23 45 67 89"
             value={data.phone}
             onChange={(e) => setData({ ...data, phone: e.target.value })}
-            className="h-12 mt-1"
+            className="h-12 mt-1 bg-white"
           />
         </div>
       </div>
