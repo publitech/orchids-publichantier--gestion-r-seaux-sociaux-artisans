@@ -1132,7 +1132,7 @@ export default function OnboardingPage() {
       return "Je n'ai pas de site internet";
     }
     if (currentStep === 5 && !data.logo) {
-      return "Je n'ai pas mon logo avec moi";
+      return "Je le ferai plus tard";
     }
     return "Continuer";
   };
