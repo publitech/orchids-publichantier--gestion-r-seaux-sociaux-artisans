@@ -356,7 +356,7 @@ function Step3MagicOnboarding({
             setData({ ...data, websiteUrl: e.target.value });
             setAnalyzed(false);
           }}
-          className="h-14 text-lg"
+          className="h-14 text-lg bg-white"
         />
 
         {isAnalyzing && (
