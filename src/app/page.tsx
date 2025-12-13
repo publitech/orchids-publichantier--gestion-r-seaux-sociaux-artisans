@@ -642,16 +642,6 @@ function Step6Personalization({
     return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
   };
 
-  const handleSuggestColors = () => {
-    const color1 = generateRandomColor();
-    const color2 = generateRandomColor();
-    setData({ 
-      ...data, 
-      primaryColor: hslToHex(color1), 
-      secondaryColor: hslToHex(color2) 
-    });
-  };
-
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -748,7 +738,7 @@ function Step6Personalization({
           <div className="grid grid-cols-2 gap-3">
             <Button
               variant="outline"
-              className="h-14 text-base font-medium"
+              className="h-20 text-base font-medium border-dashed border-2"
               onClick={() => fileInputRef.current?.click()}
             >
               <Upload className="w-5 h-5 mr-2" />
@@ -756,7 +746,7 @@ function Step6Personalization({
             </Button>
             <Button
               variant="outline"
-              className="h-14 text-base font-medium"
+              className="h-20 text-base font-medium border-dashed border-2"
               onClick={handleGenerateLogos}
             >
               <Wand2 className="w-5 h-5 mr-2" />
@@ -807,11 +797,6 @@ function Step6Personalization({
             </div>
           </div>
         </div>
-
-        <Button variant="outline" className="w-full" onClick={handleSuggestColors}>
-          <Wand2 className="w-4 h-4 mr-2" />
-          Suggérer des couleurs pour mes publications
-        </Button>
       </div>
 
       <Dialog open={showLogoModal} onOpenChange={(open) => setShowLogoModal(open)}>
