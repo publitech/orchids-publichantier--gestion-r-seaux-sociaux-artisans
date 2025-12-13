@@ -554,7 +554,7 @@ function Step5InterventionZone({
             placeholder="Paris"
             value={data.interventionCity}
             onChange={(e) => setData({ ...data, interventionCity: e.target.value })}
-            className="h-12 mt-1"
+            className="h-12 mt-1 bg-white"
           />
         </div>
 
