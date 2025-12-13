@@ -276,7 +276,7 @@ function Step2CompanyName({
           placeholder="Ex: Rénovation Martin"
           value={data.companyName}
           onChange={(e) => setData({ ...data, companyName: e.target.value })}
-          className="h-14 text-lg text-center font-medium"
+          className="h-14 text-lg text-center font-medium bg-white"
           autoFocus
         />
         <p className="text-sm text-muted-foreground text-center">
