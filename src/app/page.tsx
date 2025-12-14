@@ -724,18 +724,6 @@ function Step6Personalization({
     >
       <div className="space-y-6">
         <div>
-          <Label className="text-sm font-medium mb-2 block">
-            Votre métier <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            placeholder="Ex: Entreprise de rénovation, Plomberie, Électricité ..."
-            value={data.description}
-            onChange={(e) => setData({ ...data, description: e.target.value })}
-            className="h-12 bg-white"
-          />
-        </div>
-
-        <div>
           <Label className="text-sm font-medium mb-3 block">Logo de votre entreprise</Label>
           
           {logoPreview && (
