@@ -1116,9 +1116,9 @@ export default function OnboardingPage() {
       case 0: return data.authMethod !== null;
       case 1: return data.companyName.trim().length > 0;
       case 2: return true;
-      case 3: return true;
+      case 3: return data.description.trim().length > 0;
       case 4: return true;
-      case 5: return data.description.trim().length > 0;
+      case 5: return true;
       case 6: return true;
       case 7: return true;
       case 8: return true;
